@@ -38,4 +38,28 @@ class User extends Authenticatable
     {
         return $this->belongsTo(MembershipTier::class);
     }
+
+    /**
+     * Get the tools owned by the user.
+     */
+    public function tools()
+    {
+        return $this->hasMany(Tool::class, 'owner_id');
+    }
+
+    /**
+     * Get the reservations made by the user.
+     */
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'borrower_id');
+    }
+
+    /**
+     * Get the reviews received by the user.
+     */
+    public function reviewsReceived()
+    {
+        return $this->hasMany(Review::class, 'reviewed_user_id');
+    }
 }

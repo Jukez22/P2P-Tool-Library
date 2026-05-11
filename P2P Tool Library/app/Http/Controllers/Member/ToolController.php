@@ -4,14 +4,22 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tool;
+use App\Models\User;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class ToolController extends Controller
 {
-     public function index()
+    public function index()
     {
-        $tools = Tool::all();
-        return response()->json($tools);
+        $tools = Tool::with('category', 'owner')->get();
+        return view('member.tools.index', compact('tools'));
+    }
+
+    public function create()
+    {
+        $categories = Category::all();
+        return view('member.tools.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -29,24 +37,30 @@ class ToolController extends Controller
             'price'            => $request->price,
             'description'      => $request->description,
             'condition_status' => $request->condition_status,
-            'location_lat'     => $request->location_lat,
-            'location_lng'     => $request->location_lng,
             'category_id'      => $request->category_id,
+            'owner_id'         => auth()->id(),
             'is_boosted'       => false,
         ]);
 
-        return response()->json($tool, 201);
+        return redirect()->route('member.dashboard')->with('success', 'Tool listed successfully!');
     }
 
     public function show($id)
     {
-        $tool = Tool::find($id);
+        $tool = Tool::with(['category', 'owner'])->findOrFail($id);
+        return view('member.tools.show', compact('tool'));
+    }
 
-        if (!$tool) {
-            return response()->json(['message' => 'Tool not found'], 404);
+    public function edit($id)
+    {
+        $tool = Tool::findOrFail($id);
+        
+        if ($tool->owner_id !== auth()->id()) {
+            abort(403);
         }
 
-        return response()->json($tool);
+        $categories = Category::all();
+        return view('member.tools.edit', compact('tool', 'categories'));
     }
 
     public function update(Request $request, $id)
@@ -55,6 +69,10 @@ class ToolController extends Controller
 
         if (!$tool) {
             return response()->json(['message' => 'Tool not found'], 404);
+        }
+
+        if ($tool->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $request->validate([
@@ -66,11 +84,10 @@ class ToolController extends Controller
         ]);
 
         $tool->update($request->only([
-            'title', 'price', 'description', 'condition_status', 
-            'location_lat', 'location_lng', 'category_id', 'is_boosted'
+            'title', 'price', 'description', 'condition_status', 'category_id'
         ]));
 
-        return response()->json($tool);
+        return redirect()->route('member.dashboard')->with('success', 'Tool updated successfully!');
     }
 
     public function destroy($id)
@@ -81,9 +98,13 @@ class ToolController extends Controller
             return response()->json(['message' => 'Tool not found'], 404);
         }
 
+        if ($tool->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $tool->delete();
 
-        return response()->json(['message' => 'Tool deleted successfully']);
+        return redirect()->route('member.dashboard')->with('success', 'Tool deleted successfully!');
     }
 }
 

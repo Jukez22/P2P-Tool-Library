@@ -15,6 +15,7 @@ class Tool extends Model
         'location_lng',
         'location_lat',
         'category_id',
+        'owner_id',
     ];
 
     protected $casts = [
@@ -29,6 +30,11 @@ class Tool extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function reservations()

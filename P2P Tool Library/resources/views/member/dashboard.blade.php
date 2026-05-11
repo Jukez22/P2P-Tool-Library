@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Member Dashboard – 3EDTAK</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --sidebar-bg: #ffffff;
+      --main-bg: #f8f9fa;
+      --border-color: #dee2e6;
+    }
+    body { background-color: var(--main-bg); font-family: 'Segoe UI', sans-serif; color: #333; }
+    
+    .sidebar { min-height: 100vh; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); }
+    .sidebar .btn { font-size: 0.85rem; text-align: left; width: 100%; border: none; border-radius: 0; padding: 10px 15px; color: #6c757d; background: transparent; transition: 0.2s; }
+    .sidebar .btn:hover { background-color: #f1f3f5; color: #0d6efd; }
+    .sidebar .btn.active-link { background-color: #e7f1ff; color: #0d6efd !important; font-weight: bold; border-right: 4px solid #0d6efd; }
+    
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .table { background: #fff; margin-bottom: 0; }
+    .section-head { font-size: 0.68rem; text-transform: uppercase; color: #adb5bd; font-weight: bold; padding: 15px 15px 5px; margin: 0; }
+    
+    .progress { height: 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold text-primary" href="index.html">3EDTAK - Member Dashboard</a>
+    <div class="d-flex align-items-center gap-3">
+      <small class="fw-bold text-secondary">{{ $user->name }}</small>
+      <form action="{{ route('logout') }}" method="POST" class="m-0">
+        @csrf
+        <button type="submit" class="btn btn-outline-secondary btn-sm">Logout</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <div class="col-md-2 p-0 sidebar">
+      <div class="p-3 border-bottom">
+        <div class="fw-bold small">{{ $user->name }}</div>
+        <div class="text-secondary" style="font-size:0.75rem;">{{ ucfirst($user->role) }} · Trust {{ $user->trust_score ?? 'N/A' }} ★</div>
+      </div>
+      
+      <div class="section-head">Overview</div>
+      <button class="btn active-link" onclick="show('dashboard',this)">🏠 Dashboard</button>
+      <a href="browse.html" class="btn d-block text-decoration-none">🔍 Browse Tools</a>
+      <button class="btn" onclick="show('reservations',this)">📅 My Reservations</button>
+      <button class="btn" onclick="show('messages',this)">💬 Messages</button>
+
+      <div class="section-head">My Tools</div>
+      <button class="btn" onclick="show('mytools',this)">🔧 My Listed Tools</button>
+      <button class="btn" onclick="show('addtool',this)">➕ List a Tool</button>
+      <button class="btn" onclick="show('calendar',this)">🗓️ Availability Calendar</button>
+
+      <div class="section-head">Account</div>
+      <button class="btn" onclick="show('trust',this)">⭐ Trust Score</button>
+      <button class="btn" onclick="show('deposit',this)">💰 Deposit / Escrow</button>
+      <button class="btn" onclick="show('referral',this)">🎁 Referral Rewards</button>
+      <button class="btn" onclick="show('membership',this)">🏅 Membership</button>
+    </div>
+
+    <div class="col-md-10 p-4">
+
+      <div class="panel active" id="panel-dashboard">
+        <div class="fw-bold fs-5 mb-1">Dashboard</div>
+        <div class="text-secondary small mb-3">Welcome back, {{ explode(' ', $user->name)[0] }}</div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-3"><div class="card p-3 text-center"><div class="fs-4 fw-bold text-primary">{{ $user->reservations->where('status', 'Active')->count() }}</div><small class="text-secondary">Active Borrowings</small></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center"><div class="fs-4 fw-bold text-primary">{{ $user->tools->count() }}</div><small class="text-secondary">Tools Listed</small></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center"><div class="fs-4 fw-bold text-primary">{{ $user->trust_score ?? '0' }}</div><small class="text-secondary">Trust Score</small></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center"><div class="fs-4 fw-bold text-primary">0 EGP</div><small class="text-secondary">Earnings This Month</small></div></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span class="fw-bold small">Current Borrowings</span>
+                <button class="btn btn-outline-secondary btn-sm p-1 px-2" style="font-size: 0.7rem;" onclick="show('reservations',null)">View All</button>
+              </div>
+              <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                  <tbody>
+                    @forelse($user->reservations->take(5) as $reservation)
+                    <tr>
+                      <td>🔩 {{ $reservation->tool->title }}</td>
+                      <td><span class="badge {{ $reservation->status == 'Active' ? 'bg-success' : 'bg-warning text-dark' }}">{{ $reservation->status }}</span></td>
+                      <td class="text-secondary">Due {{ $reservation->end_datetime->format('M d') }}</td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="3" class="text-center text-muted">No borrowings yet.</td></tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span class="fw-bold small">Recent Messages</span>
+                <button class="btn btn-outline-secondary btn-sm p-1 px-2" style="font-size: 0.7rem;" onclick="show('messages',null)">Open Inbox</button>
+              </div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item small"><div class="fw-bold">Sara Youssef (Lender)</div><div class="text-secondary">The drill is available from tomorrow...</div></li>
+                <li class="list-group-item small"><div class="fw-bold">Ahmed Farouk (Librarian)</div><div class="text-secondary">Your dispute case #1042 has been resolved</div></li>
+                <li class="list-group-item small"><div class="fw-bold">ToolShare System</div><div class="text-secondary">Reminder: Return tile saw by May 7</div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header bg-light fw-bold small">My Listed Tools</div>
+              <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                  <tbody>
+                    @forelse($user->tools->take(5) as $tool)
+                    <tr>
+                      <td>🔧 {{ $tool->title }}</td>
+                      <td class="text-secondary">{{ $tool->reservations_count ?? 0 }} borrows</td>
+                      <td><span class="badge bg-success">Available</span></td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="3" class="text-center text-muted">No tools listed yet.</td></tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header bg-light fw-bold small">Trust Score Breakdown</div>
+              <div class="card-body">
+                <div class="text-center mb-3"><div class="fs-2 fw-bold text-primary">4.2</div><div class="text-warning">★★★★☆</div><small class="text-secondary">24 transactions</small></div>
+                <div class="mb-2"><div class="d-flex justify-content-between small mb-1"><span>Return Punctuality</span><span class="text-primary fw-bold">96%</span></div><div class="progress"><div class="progress-bar" style="width:96%"></div></div></div>
+                <div class="mb-2"><div class="d-flex justify-content-between small mb-1"><span>Tool Condition</span><span class="text-primary fw-bold">88%</span></div><div class="progress"><div class="progress-bar" style="width:88%"></div></div></div>
+                <div><div class="d-flex justify-content-between small mb-1"><span>Communication</span><span class="text-primary fw-bold">92%</span></div><div class="progress"><div class="progress-bar" style="width:92%"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-reservations">
+        <div class="fw-bold fs-5 mb-1">My Reservations</div>
+        <div class="text-secondary small mb-3">Track all your borrowing requests and active rentals</div>
+        <div class="card">
+          <div class="card-body p-0">
+            <table class="table table-hover mb-0 small text-center align-middle">
+              <thead class="table-light"><tr><th>Tool</th><th>Lender</th><th>Dates</th><th>Cost</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                @forelse($user->reservations as $reservation)
+                <tr>
+                  <td>🔩 {{ $reservation->tool->title }}</td>
+                  <td>{{ $reservation->tool->owner->name ?? 'N/A' }}</td>
+                  <td>{{ $reservation->start_datetime->format('M d') }}–{{ $reservation->end_datetime->format('d') }}</td>
+                  <td class="fw-bold text-primary">{{ $reservation->total_price }} EGP</td>
+                  <td><span class="badge {{ $reservation->status == 'Active' ? 'bg-success' : 'bg-warning text-dark' }}">{{ $reservation->status }}</span></td>
+                  <td>
+                    @if($reservation->status == 'Active')
+                    <button class="btn btn-primary btn-sm">Return</button>
+                    @else
+                    <button class="btn btn-outline-secondary btn-sm">Details</button>
+                    @endif
+                  </td>
+                </tr>
+                @empty
+                <tr><td colspan="6" class="text-center text-muted">No reservations found.</td></tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-messages">
+        <div class="fw-bold fs-5 mb-1">Messages</div>
+        <div class="text-secondary small mb-3">Your contact details are always hidden</div>
+        <div class="card">
+          <div class="row g-0" style="min-height:400px;">
+            <div class="col-md-4 border-end p-2 bg-light">
+              <input type="text" class="form-control form-control-sm mb-2" placeholder="Search messages..."/>
+              <div class="list-group list-group-flush border rounded overflow-hidden">
+                <button class="list-group-item list-group-item-action active small">
+                  <div class="fw-bold text-white">Sara Youssef</div>
+                  <div class="text-white-50 text-truncate">The drill is available...</div>
+                </button>
+                <button class="list-group-item list-group-item-action small">
+                  <div class="fw-bold">Omar Farouk</div>
+                  <div class="text-secondary text-truncate">Case resolved</div>
+                </button>
+                <button class="list-group-item list-group-item-action small">
+                  <div class="fw-bold">Mohamed Ramzy</div>
+                  <div class="text-secondary text-truncate">Is 3D printer available?</div>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-8 d-flex flex-column">
+              <div class="p-3 border-bottom small"><div class="fw-bold">Sara Youssef</div><div class="text-secondary">Lender · Milwaukee Power Drill</div></div>
+              <div class="flex-grow-1 p-3 small">
+                <div class="mb-3"><div class="bg-light border rounded p-2 d-inline-block shadow-sm" style="max-width:70%;">Hi! The drill is available from tomorrow. Would you like to confirm?</div></div>
+                <div class="mb-3 text-end"><div class="bg-primary text-white rounded p-2 d-inline-block shadow-sm" style="max-width:70%;">Yes, I'd like to book it for 3 days starting tomorrow.</div></div>
+              </div>
+              <div class="p-2 border-top d-flex gap-2">
+                <input type="text" class="form-control form-control-sm" placeholder="Type a message..."/>
+                <button class="btn btn-primary btn-sm">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-mytools">
+        <div class="fw-bold fs-5 mb-1">My Listed Tools</div>
+        <div class="text-secondary small mb-3">Manage your listings and view earnings</div>
+        <div class="card">
+          <div class="card-body p-0">
+            <table class="table table-hover mb-0 small text-center align-middle">
+              <thead class="table-light"><tr><th>Tool</th><th>Category</th><th>Borrows</th><th>Rating</th><th>Earnings</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                @forelse($user->tools as $tool)
+                <tr>
+                  <td>🔧 {{ $tool->title }}</td>
+                  <td>{{ $tool->category->name ?? 'N/A' }}</td>
+                  <td>{{ $tool->reservations_count ?? 0 }}</td>
+                  <td>{{ $tool->rating ?? 'N/A' }} ★</td>
+                  <td class="fw-bold text-primary">0 EGP</td>
+                  <td><span class="badge bg-success">Available</span></td>
+                  <td><button class="btn btn-outline-secondary btn-sm">Edit</button></td>
+                </tr>
+                @empty
+                <tr><td colspan="7" class="text-center text-muted">No tools listed.</td></tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-addtool">
+        <div class="fw-bold fs-5 mb-1">List a New Tool</div>
+        <div class="text-secondary small mb-3">Fill in the details to start lending your tool</div>
+        <div class="card" style="max-width:600px;">
+          <div class="card-body">
+            <div class="row g-3 mb-3">
+              <div class="col-6"><label class="form-label small fw-bold">Tool Name</label><input type="text" class="form-control" placeholder="e.g. Bosch Power Drill"/></div>
+              <div class="col-6"><label class="form-label small fw-bold">Category</label><select class="form-select"><option>Power Tools</option><option>3D Printing</option><option>Measurement</option><option>Woodworking</option><option>Sewing</option></select></div>
+            </div>
+            <div class="mb-3"><label class="form-label small fw-bold">Description</label><textarea class="form-control" rows="3" placeholder="Describe the tool..."></textarea></div>
+            <div class="row g-3 mb-3">
+              <div class="col-6"><label class="form-label small fw-bold">Daily Rate (EGP)</label><input type="number" class="form-control" placeholder="50"/></div>
+              <div class="col-6"><label class="form-label small fw-bold">Deposit (EGP)</label><input type="number" class="form-control" placeholder="300"/></div>
+            </div>
+            <div class="mb-3"><label class="form-label small fw-bold">Upload Photos</label><input type="file" class="form-control form-control-sm" multiple/></div>
+            <button class="btn btn-primary w-100 fw-bold" onclick="alert('Tool submitted for review!')">Submit for Review</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-calendar">
+        <div class="fw-bold fs-5 mb-1">Availability Calendar</div>
+        <div class="text-secondary small mb-3">Set available dates and buffer periods</div>
+        <div class="card" style="max-width:460px;">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <button class="btn btn-outline-secondary btn-sm">← Prev</button>
+              <strong class="text-dark">May 2026</strong>
+              <button class="btn btn-outline-secondary btn-sm">Next →</button>
+            </div>
+            <div class="row row-cols-7 g-1 text-center mb-2">
+              <div class="col"><small class="text-secondary fw-bold">Su</small></div><div class="col"><small class="text-secondary fw-bold">Mo</small></div><div class="col"><small class="text-secondary fw-bold">Tu</small></div><div class="col"><small class="text-secondary fw-bold">We</small></div><div class="col"><small class="text-secondary fw-bold">Th</small></div><div class="col"><small class="text-secondary fw-bold">Fr</small></div><div class="col"><small class="text-secondary fw-bold">Sa</small></div>
+            </div>
+            <div class="row row-cols-7 g-1 text-center small">
+              <div class="col"></div><div class="col"></div><div class="col"></div>
+              <div class="col"><span class="badge bg-success w-100">1</span></div>
+              <div class="col"><span class="badge bg-success w-100">2</span></div>
+              <div class="col"><span class="badge bg-primary w-100 shadow">3</span></div>
+              <div class="col"><span class="badge bg-success w-100">4</span></div>
+              <div class="col"><span class="badge bg-warning text-dark w-100">5</span></div>
+              <div class="col"><span class="badge bg-warning text-dark w-100">6</span></div>
+              <div class="col"><span class="badge bg-warning text-dark w-100">7</span></div>
+              <div class="col"><span class="badge bg-success w-100">8</span></div>
+              <div class="col"><span class="badge bg-success w-100">9</span></div>
+              <div class="col"><span class="badge bg-light text-dark border w-100">10</span></div>
+              <div class="col"><span class="badge bg-light text-dark border w-100">11</span></div>
+              <div class="col"><span class="badge bg-success w-100">12</span></div>
+              <div class="col"><span class="badge bg-success w-100">13</span></div>
+              <div class="col"><span class="badge bg-light text-dark border w-100">14</span></div>
+            </div>
+            <div class="d-flex gap-3 mt-4 small text-secondary">
+              <span><span class="badge bg-success">·</span> Available</span>
+              <span><span class="badge bg-warning text-dark">·</span> Booked</span>
+              <span><span class="badge bg-primary">·</span> Today</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-trust">
+        <div class="fw-bold fs-5 mb-1">Trust Score</div>
+        <div class="text-secondary small mb-3">Your community reputation</div>
+        <div class="card p-3" style="max-width:460px;">
+          <div class="text-center mb-4"><div class="fs-1 fw-bold text-primary">4.2</div><div class="text-warning fs-5">★★★★☆</div><small class="text-secondary">Based on 24 transactions</small></div>
+          <div class="mb-3"><div class="d-flex justify-content-between small mb-1"><span>Return Punctuality</span><span class="text-primary fw-bold">96%</span></div><div class="progress"><div class="progress-bar bg-primary" style="width:96%"></div></div></div>
+          <div class="mb-3"><div class="d-flex justify-content-between small mb-1"><span>Tool Condition</span><span class="text-primary fw-bold">88%</span></div><div class="progress"><div class="progress-bar bg-primary" style="width:88%"></div></div></div>
+          <div class="mb-3"><div class="d-flex justify-content-between small mb-1"><span>Communication</span><span class="text-primary fw-bold">92%</span></div><div class="progress"><div class="progress-bar bg-primary" style="width:92%"></div></div></div>
+          <div class="mb-3"><div class="d-flex justify-content-between small mb-1"><span>Zero Disputes</span><span class="text-primary fw-bold">100%</span></div><div class="progress"><div class="progress-bar bg-success" style="width:100%"></div></div></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-deposit">
+        <div class="fw-bold fs-5 mb-1">Deposit & Escrow</div>
+        <div class="text-secondary small mb-3">Insurance deposits held securely</div>
+        <div class="row g-3 mb-4 text-center">
+          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">1,700 EGP</div><small class="text-secondary">Held in Escrow</small></div></div>
+          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">3,200 EGP</div><small class="text-secondary">Total Released</small></div></div>
+          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-danger">0 EGP</div><small class="text-secondary">Forfeited</small></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header bg-light fw-bold small">Transactions</div>
+          <div class="card-body p-0">
+            <table class="table table-hover mb-0 small text-center align-middle">
+              <thead class="table-light"><tr><th>Tool</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>🔩 Milwaukee Power Drill</td><td>May 3</td><td class="text-primary fw-bold">200 EGP</td><td><span class="badge bg-warning text-dark">Held</span></td></tr>
+                <tr><td>🪚 Tile Saw</td><td>May 3</td><td class="text-primary fw-bold">500 EGP</td><td><span class="badge bg-warning text-dark">Held</span></td></tr>
+                <tr><td>📷 Thermal Camera</td><td>May 4</td><td class="text-primary fw-bold">1,000 EGP</td><td><span class="badge bg-warning text-dark">Held</span></td></tr>
+                <tr><td>🔬 Oscilloscope</td><td>Apr 23</td><td class="text-primary fw-bold">400 EGP</td><td><span class="badge bg-success">Released</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-referral">
+        <div class="fw-bold fs-5 mb-1">Referral Rewards</div>
+        <div class="text-secondary small mb-3">Earn for every new verified lender</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card p-3">
+              <div class="fw-bold small mb-2">Your Referral Link</div>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control form-control-sm bg-light" value="toolshare.eg/ref/AHMED42" readonly/>
+                <button class="btn btn-primary btn-sm" onclick="alert('Copied!')">Copy</button>
+              </div>
+              <div class="bg-primary bg-opacity-10 p-3 rounded text-center border border-primary"><div class="fs-4 fw-bold text-primary">150 EGP</div><small class="text-secondary">Available Credits</small></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header bg-light fw-bold small">Referral History</div>
+              <div class="card-body p-0">
+                <table class="table mb-0 small">
+                  <thead class="table-light"><tr><th>Name</th><th>Joined</th><th>Credit</th></tr></thead>
+                  <tbody>
+                    <tr><td>Karim Amin</td><td>Apr 12</td><td class="text-success fw-bold">+50 EGP</td></tr>
+                    <tr><td>Nour Fathy</td><td>Apr 28</td><td class="text-success fw-bold">+50 EGP</td></tr>
+                    <tr><td>Rania Mostafa</td><td>Pending</td><td><span class="badge bg-secondary">Pending</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-membership">
+        <div class="fw-bold fs-5 mb-1">Membership</div>
+        <div class="text-secondary small mb-3">Upgrade your tier to unlock features</div>
+        <div class="row g-3" style="max-width:500px;">
+              <h4 class="fw-bold">REACH 4.5★ TO UNLOCK PRO FEATURES</h2>
+
+       <!--   <div class="col-6"><div class="card p-3 h-100 border-2 border-primary border-opacity-10 shadow-sm"><div class="text-secondary small mb-1 uppercase fw-bold" style="font-size:0.6rem;">CURRENT</div><div class="fs-5 fw-bold mb-2">Casual</div><div class="text-secondary small">✓ 3 borrows/month<br/>✓ Standard pricing<br/>✗ No priority</div></div></div>
+          <div class="col-6"><div class="card p-3 h-100 border-2 border-primary shadow-sm"><div class="text-primary small mb-1 uppercase fw-bold" style="font-size:0.6rem;">UPGRADE TO</div><div class="fs-5 fw-bold text-primary mb-1">Pro</div><div class="text-secondary small mb-1 fw-bold">150 EGP/month</div><div class="text-secondary small mb-3">✓ Unlimited borrows<br/>✓ 20% off rentals<br/>✓ Priority access</div><button class="btn btn-primary btn-sm w-100 fw-bold">Upgrade Now</button></div></div>-->
+        </div>
+      </div>
+
+    </div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function show(id, el) {
+    // 3shan nkhby el panels kolaha awl ma ados 3la ay button
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    // 3shan a3ml active lel panel elly ana ados 3leh
+    const target = document.getElementById('panel-' + id);
+    if(target) target.classList.add('active');
+    
+    // a3ml active lel button elly ana ados 3leh w a5ly el buttons el tanyen yeshilo active
+    document.querySelectorAll('.sidebar .btn').forEach(b => {
+      b.classList.remove('active-link');
+    });
+    if (el) {
+      el.classList.add('active-link');
+    }
+  }
+</script>
+</body>
+</html>

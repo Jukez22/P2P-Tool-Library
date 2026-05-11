@@ -23,8 +23,8 @@ class MessageController extends Controller
             ->get();
 
         $contacts = User::whereIn('id', $conversations->pluck('contact_id'))->get();
-
-        return response()->json($contacts);
+        
+        return view('member.messages.index', compact('contacts'));
     }
 
     // View the chat history with a specific person
@@ -41,12 +41,14 @@ class MessageController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
+        $contact = User::findOrFail($contactId);
+
         // Mark messages as read when viewing them
         Message::where('sender_id', $contactId)
             ->where('receiver_id', $userId)
             ->update(['is_read' => true]);
 
-        return response()->json($messages);
+        return view('member.messages.show', compact('messages', 'contact'));
     }
 
     // Send a new message
@@ -64,6 +66,6 @@ class MessageController extends Controller
             'is_read'     => false,
         ]);
 
-        return response()->json($message, 201);
+        return back();
     }
 }

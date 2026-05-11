@@ -8,6 +8,8 @@ use App\Http\Controllers\Member\ReservationController;
 use App\Http\Controllers\Member\ProfileController;
 use App\Http\Controllers\Member\MessageController;
 use App\Http\Controllers\Member\ReportController;
+use App\Http\Controllers\Member\ReviewController;
+use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 
 use App\Http\Controllers\Librarian\DashboardController;
 use App\Http\Controllers\Librarian\InventoryController;
@@ -48,12 +50,14 @@ Route::middleware(['auth'])->group(function () {
     // MEMBER MODULE (Lenders & Borrowers)
     // ==========================================
     Route::prefix('member')->name('member.')->group(function () {
+        Route::get('dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
         Route::resource('tools', ToolController::class);
         Route::resource('reservations', ReservationController::class);
         Route::resource('profile', ProfileController::class);
         Route::put('profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.changePassword');
         Route::resource('messages', MessageController::class);
         Route::resource('reports', ReportController::class);
+        Route::post('reviews', [ReviewController::class, 'store'])->name('reviews.store');
     });
 
     // ==========================================

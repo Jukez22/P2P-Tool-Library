@@ -4,14 +4,24 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
+use App\Models\Tool;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
     public function index()
     {
-        $reservations = Reservation::all();
+        $userId = auth()->id();
+
+        // Show reservations where user is the borrower OR the tool owner
+        $reservations = Reservation::where('borrower_id', $userId)
+            ->orWhereHas('tool', function ($query) use ($userId) {
+                $query->where('owner_id', $userId);
+            })
+            ->with(['tool', 'borrower']) // Optional: load relationships for better UI
+            ->get();
+
         return response()->json($reservations);
     }
 
@@ -26,7 +36,7 @@ class ReservationController extends Controller
 
         $reservation = Reservation::create([
             'tool_id'        => $request->tool_id,
-            'borrower_id'    => Auth::id(), // Securely get the logged-in user's ID
+            'borrower_id'    => auth()->id(), // Securely get the logged-in user's ID
             'start_datetime' => $request->start_datetime,
             'end_datetime'   => $request->end_datetime,
             'total_price'    => $request->total_price,
@@ -38,10 +48,16 @@ class ReservationController extends Controller
 
     public function show($id)
     {
-        $reservation = Reservation::find($id);
+        $userId = auth()->id();
+        $reservation = Reservation::with('tool')->find($id);
 
         if (!$reservation) {
             return response()->json(['message' => 'Reservation not found'], 404);
+        }
+
+        // Authorization: Must be borrower or tool owner
+        if ($reservation->borrower_id !== $userId && $reservation->tool->owner_id !== $userId) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         return response()->json($reservation);
@@ -49,10 +65,16 @@ class ReservationController extends Controller
 
     public function update(Request $request, $id)
     {
-        $reservation = Reservation::find($id);
+        $userId = auth()->id();
+        $reservation = Reservation::with('tool')->find($id);
 
         if (!$reservation) {
             return response()->json(['message' => 'Reservation not found'], 404);
+        }
+
+        // Authorization
+        if ($reservation->borrower_id !== $userId && $reservation->tool->owner_id !== $userId) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $request->validate([
@@ -62,6 +84,9 @@ class ReservationController extends Controller
             'total_price' => 'sometimes|required|numeric',
         ]);
 
+        // Logic check: only owner can change status to "Completed" or "Cancelled" 
+        // (Simplified for now, you can add more specific rules)
+        
         $reservation->update($request->only([
             'start_datetime', 'end_datetime', 'status', 'total_price'
         ]));
@@ -71,10 +96,16 @@ class ReservationController extends Controller
 
     public function destroy($id)
     {
+        $userId = auth()->id();
         $reservation = Reservation::find($id);
 
         if (!$reservation) {
             return response()->json(['message' => 'Reservation not found'], 404);
+        }
+
+        // Only borrower can delete/cancel their own reservation request
+        if ($reservation->borrower_id !== $userId) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $reservation->delete();

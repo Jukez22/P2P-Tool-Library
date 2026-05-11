@@ -40,7 +40,10 @@ return new class extends Migration
                 $table->decimal('location_lng', 10, 7);
                 $table->decimal('location_lat', 10, 7);
                 $table->integer('category_id');
+                $table->integer('owner_id');
                 $table->timestamp('created_at')->useCurrent();
+
+                $table->foreign('owner_id')->references('id')->on('users');
             });
         }
 
@@ -194,7 +197,7 @@ return new class extends Migration
                 $table->string('phone', 20);
                 $table->string('email', 50)->unique();
                 $table->string('password');
-                $table->enum('role', ['lender', 'borrower', 'libraian', 'technician']);
+                $table->enum('role', ['lender', 'borrower', 'librarian', 'technician']);
                 $table->string('address', 255)->nullable();
                 $table->integer('membership_tier_id');
                 $table->integer('trust_score')->default(0);
