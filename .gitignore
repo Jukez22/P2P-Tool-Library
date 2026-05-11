@@ -1,0 +1,4 @@
+/temp-laravel
+/node_modules
+.env
+*.log
