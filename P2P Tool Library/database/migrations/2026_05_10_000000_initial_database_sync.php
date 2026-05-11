@@ -162,12 +162,45 @@ return new class extends Migration
             });
         }
         
-        // Final sync for users table password field if missing
-        if (Schema::hasTable('users')) {
-            Schema::table('users', function (Blueprint $table) {
-                if (!Schema::hasColumn('users', 'password')) {
-                    $table->string('password')->after('email');
-                }
+        if (!Schema::hasTable('reports')) {
+            Schema::create('reports', function (Blueprint $table) {
+                $table->integer('id', true);
+                $table->integer('reporter_id');
+                $table->integer('reported_user_id')->nullable();
+                $table->integer('reported_tool_id')->nullable();
+                $table->integer('reservation_id')->nullable();
+                $table->enum('reason', ['damaged_tool', 'no_show', 'fraud', 'late_return', 'other']);
+                $table->text('description');
+                $table->enum('status', ['pending', 'resolved', 'dismissed'])->default('pending');
+                $table->timestamp('created_at')->useCurrent();
+            });
+        }
+
+        if (!Schema::hasTable('messages')) {
+            Schema::create('messages', function (Blueprint $table) {
+                $table->integer('id', true);
+                $table->integer('sender_id');
+                $table->integer('receiver_id');
+                $table->text('content');
+                $table->boolean('is_read')->default(false);
+                $table->timestamp('created_at')->useCurrent();
+            });
+        }
+
+        if (!Schema::hasTable('users')) {
+            Schema::create('users', function (Blueprint $table) {
+                $table->integer('id', true);
+                $table->string('name', 50);
+                $table->string('phone', 20);
+                $table->string('email', 50)->unique();
+                $table->string('password');
+                $table->enum('role', ['lender', 'borrower', 'libraian', 'technician']);
+                $table->string('address', 255)->nullable();
+                $table->integer('membership_tier_id');
+                $table->integer('trust_score')->default(0);
+                $table->rememberToken();
+                $table->timestamp('created_at')->useCurrent();
+                $table->foreign('membership_tier_id')->references('id')->on('membership_tiers');
             });
         }
     }

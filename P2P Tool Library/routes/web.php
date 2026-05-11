@@ -51,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('tools', ToolController::class);
         Route::resource('reservations', ReservationController::class);
         Route::resource('profile', ProfileController::class);
+        Route::put('profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.changePassword');
         Route::resource('messages', MessageController::class);
         Route::resource('reports', ReportController::class);
     });

@@ -48,6 +48,6 @@ class Tool extends Model
 
     public function maintenanceLogs()
     {
-        return $this->hasMany(MaintenanceLog.php);
+        return $this->hasMany(MaintenanceLog::class);
     }
 }
