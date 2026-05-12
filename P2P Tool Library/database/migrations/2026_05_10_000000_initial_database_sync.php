@@ -29,16 +29,33 @@ return new class extends Migration
             });
         }
 
+        if (!Schema::hasTable('users')) {
+            Schema::create('users', function (Blueprint $table) {
+                $table->integer('id', true);
+                $table->string('name', 50);
+                $table->string('phone', 20);
+                $table->string('email', 50)->unique();
+                $table->string('password');
+                $table->enum('role', ['lender', 'borrower', 'librarian', 'technician']);
+                $table->string('address', 255)->nullable();
+                $table->integer('membership_tier_id');
+                $table->decimal('trust_score', 3, 1)->default(3.0);
+                $table->rememberToken();
+                $table->timestamp('created_at')->useCurrent();
+                $table->foreign('membership_tier_id')->references('id')->on('membership_tiers');
+            });
+        }
+
         if (!Schema::hasTable('tools')) {
             Schema::create('tools', function (Blueprint $table) {
                 $table->integer('id', true);
-                $table->string('title', 100);
-                $table->decimal('price', 10, 2);
+                $table->string('title');
+                $table->decimal('price', 8, 2);
                 $table->text('description');
-                $table->enum('condition_status', ['new', 'good', 'fair', 'poor']);
+                $table->enum('condition_status', ['Excellent', 'Good', 'Fair', 'Needs Repair']);
                 $table->boolean('is_boosted');
-                $table->decimal('location_lng', 10, 7);
-                $table->decimal('location_lat', 10, 7);
+                $table->decimal('location_lng', 10, 7)->nullable();
+                $table->decimal('location_lat', 10, 7)->nullable();
                 $table->integer('category_id');
                 $table->integer('owner_id');
                 $table->timestamp('created_at')->useCurrent();
@@ -53,7 +70,7 @@ return new class extends Migration
                 $table->dateTime('start_datetime');
                 $table->dateTime('end_datetime');
                 $table->integer('borrower_id');
-                $table->enum('status', ['pending', 'completed', 'cancelled', '']);
+                $table->enum('status', ['Pending', 'Active', 'Confirmed', 'Completed', 'Cancelled']);
                 $table->integer('tool_id');
                 $table->decimal('total_price', 10, 2);
                 $table->timestamp('created_at')->useCurrent();
@@ -179,33 +196,9 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('messages')) {
-            Schema::create('messages', function (Blueprint $table) {
-                $table->integer('id', true);
-                $table->integer('sender_id');
-                $table->integer('receiver_id');
-                $table->text('content');
-                $table->boolean('is_read')->default(false);
-                $table->timestamp('created_at')->useCurrent();
-            });
-        }
 
-        if (!Schema::hasTable('users')) {
-            Schema::create('users', function (Blueprint $table) {
-                $table->integer('id', true);
-                $table->string('name', 50);
-                $table->string('phone', 20);
-                $table->string('email', 50)->unique();
-                $table->string('password');
-                $table->enum('role', ['lender', 'borrower', 'librarian', 'technician']);
-                $table->string('address', 255)->nullable();
-                $table->integer('membership_tier_id');
-                $table->integer('trust_score')->default(0);
-                $table->rememberToken();
-                $table->timestamp('created_at')->useCurrent();
-                $table->foreign('membership_tier_id')->references('id')->on('membership_tiers');
-            });
-        }
+
+
     }
 
     /**

@@ -28,7 +28,7 @@ class User extends Authenticatable
     protected $casts = [
         'password'           => 'hashed',
         'membership_tier_id' => 'integer',
-        'trust_score'        => 'integer',
+        'trust_score'        => 'float',
     ];
 
     /**
@@ -61,5 +61,37 @@ class User extends Authenticatable
     public function reviewsReceived()
     {
         return $this->hasMany(Review::class, 'reviewed_user_id');
+    }
+
+    /**
+     * Get the messages received by the user.
+     */
+    public function messagesReceived()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    /**
+     * Get the messages sent by the user.
+     */
+    public function messagesSent()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * Get the referrals made by the user.
+     */
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'referrer_user_id');
+    }
+
+    /**
+     * Get the trust score logs for the user.
+     */
+    public function trustScoreLogs()
+    {
+        return $this->hasMany(TrustScoreLog::class, 'user_id');
     }
 }

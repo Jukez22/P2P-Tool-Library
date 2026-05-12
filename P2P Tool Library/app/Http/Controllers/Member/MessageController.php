@@ -66,6 +66,6 @@ class MessageController extends Controller
             'is_read'     => false,
         ]);
 
-        return back();
+        return redirect()->route('member.dashboard', ['panel' => 'messages', 'contact_id' => $request->receiver_id])->with('success', 'Message sent!');
     }
 }

@@ -12,8 +12,9 @@ class ToolController extends Controller
 {
     public function index()
     {
-        $tools = Tool::with('category', 'owner')->get();
-        return view('member.tools.index', compact('tools'));
+        $tools = Tool::with(['category', 'owner'])->get();
+        $categories = Category::all();
+        return view('member.tools.index', compact('tools', 'categories'));
     }
 
     public function create()

@@ -40,7 +40,7 @@ class AuthController extends Controller
             'phone'    => 'required|string|max:20',
             'email'    => 'required|string|email|max:50|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|in:lender,borrower,libraian,technician',
+            'role'     => 'required|in:lender,borrower,librarian,technician',
             'address'  => 'nullable|string|max:255',
         ]);
 
@@ -52,27 +52,32 @@ class AuthController extends Controller
             'role'               => $data['role'],
             'address'            => $data['address'] ?? null,
             'membership_tier_id' => 1, 
-            'trust_score'        => 0, 
+            'trust_score'        => 3, 
         ]);
 
         Auth::login($user);
 
-        return redirect('/dashboard')->with('success', 'Registration successful!');
+        return $this->redirectUserByRole($user);
     }
 
     protected function redirectUserByRole($user)
     {
         $role = $user->role;
+        
         if ($role == 'borrower' || $role == 'lender') {
-            return redirect()->intended('profile');
+            return redirect()->intended(route('member.dashboard'));
         }
+        
         if ($role == 'librarian') {
-            return redirect()->intended('dashboard');
+            return redirect()->intended(route('librarian.dashboard'));
         }
+        
         if ($role == 'technician') {
-            return redirect()->intended('logs');
+            // Adjusting to maintenance queue as the default for technicians
+            return redirect()->intended(route('maintenance.queue.index'));
         }
-        return redirect()->intended('dashboard');
+        
+        return redirect()->intended('welcome');
     }
 
     public function logout(Request $request)

@@ -28,22 +28,29 @@ class ReservationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tool_id' => 'required|integer',
+            'tool_id' => 'required|exists:tools,id',
             'start_datetime' => 'required|date',
-            'end_datetime' => 'required|date|after:start_datetime',
-            'total_price' => 'required|numeric',
+            'end_datetime' => 'required|date|after_or_equal:start_datetime',
         ]);
+
+        $tool = Tool::findOrFail($request->tool_id);
+        
+        // Calculate total price (simplified logic for demonstration)
+        $start = new \DateTime($request->start_datetime);
+        $end = new \DateTime($request->end_datetime);
+        $days = max(1, $start->diff($end)->days + 1);
+        $total_price = $tool->price * $days;
 
         $reservation = Reservation::create([
+            'borrower_id'    => auth()->id(),
             'tool_id'        => $request->tool_id,
-            'borrower_id'    => auth()->id(), // Securely get the logged-in user's ID
             'start_datetime' => $request->start_datetime,
             'end_datetime'   => $request->end_datetime,
-            'total_price'    => $request->total_price,
-            'status'         => 'Pending', // Set default status to Pending
+            'total_price'    => $total_price,
+            'status'         => 'Active',
         ]);
 
-        return response()->json($reservation, 201);
+        return redirect()->route('member.dashboard')->with('success', 'Tool borrowed successfully!');
     }
 
     public function show($id)
@@ -78,20 +85,12 @@ class ReservationController extends Controller
         }
 
         $request->validate([
-            'status' => 'sometimes|required|string',
-            'start_datetime' => 'sometimes|required|date',
-            'end_datetime' => 'sometimes|required|date|after:start_datetime',
-            'total_price' => 'sometimes|required|numeric',
+            'status' => 'required|string|in:Completed,Cancelled,Active',
         ]);
 
-        // Logic check: only owner can change status to "Completed" or "Cancelled" 
-        // (Simplified for now, you can add more specific rules)
-        
-        $reservation->update($request->only([
-            'start_datetime', 'end_datetime', 'status', 'total_price'
-        ]));
+        $reservation->update(['status' => $request->status]);
 
-        return response()->json($reservation);
+        return redirect()->route('member.dashboard')->with('success', 'Reservation updated successfully!');
     }
 
     public function destroy($id)
@@ -110,7 +109,7 @@ class ReservationController extends Controller
 
         $reservation->delete();
 
-        return response()->json(['message' => 'Reservation deleted successfully']);
+        return redirect()->route('member.dashboard')->with('success', 'Reservation cancelled successfully!');
     }
 }
 

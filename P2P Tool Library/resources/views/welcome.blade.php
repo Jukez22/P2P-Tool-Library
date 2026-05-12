@@ -1,234 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jukez Tool Library - Premium P2P Sharing</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --bg: #0f172a;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
+    <head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>3EDTAK - ToolShare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <style>
+    body { 
+      background-color: #f5f7fa; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Outfit', sans-serif;
-        }
+    .navbar {
+      background-color: #ffffff !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    .hero {
+      background: linear-gradient(135deg, #0d6efd 0%, #004085 100%);
+      color: white;
+      padding: 60px 0;
+      border-bottom-left-radius: 50px;
+      border-bottom-right-radius: 50px;
+    }
 
-        .gradient-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, rgba(15, 23, 42, 0) 50%);
-            z-index: -1;
-        }
+    .feature-card {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 15px;
+      padding: 25px;
+      height: 100%;
+      transition: 0.3s;
+    }
+    .feature-card:hover {
+      border-color: #0d6efd;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
 
-        nav {
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass-border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+    .icon-circle {
+      width: 60px;
+      height: 60px;
+      background-color: #e7f1ff;
+      color: #0d6efd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-        }
+    .btn-main {
+      border-radius: 8px;
+      padding: 10px 25px;
+      font-weight: 500;
+    }
 
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
-            margin-left: 2rem;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
-
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 4.5rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            max-width: 900px;
-        }
-
-        h1 span {
-            display: block;
-            background: linear-gradient(to right, #818cf8, #e879f9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin-bottom: 3rem;
-            line-height: 1.6;
-        }
-
-        .hero-btns {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn-outline {
-            border: 1px solid var(--glass-border);
-            color: var(--text);
-            background: var(--glass);
-        }
-
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--primary);
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin-top: 6rem;
-        }
-
-        .feature-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 2.5rem;
-            border-radius: 24px;
-            text-align: left;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(99, 102, 241, 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-            font-size: 1.5rem;
-        }
-
-        .feature-card h3 {
-            margin-bottom: 0.75rem;
-            font-size: 1.25rem;
-        }
-
-        .feature-card p {
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-    </style>
+    footer {
+      background-color: #343a40;
+      color: #adb5bd;
+      padding: 30px 0;
+      margin-top: 50px;
+    }
+  </style>
 </head>
 <body>
-    <div class="gradient-bg"></div>
-    
-    <nav>
-        <div class="logo">JUKEZ LIBRARY</div>
-        <div class="nav-links">
-            <a href="{{ route('login') }}">Login</a>
-            <a href="{{ route('register') }}" class="btn btn-primary">Join Community</a>
-        </div>
-    </nav>
 
-    <main>
-        <h1>Share Tools. <span>Build Community.</span></h1>
-        <p class="subtitle">The premium peer-to-peer library for specialized tools. Rent what you need, lend what you have, and grow together.</p>
-        
-        <div class="hero-btns">
-            <a href="{{ route('register') }}" class="btn btn-primary">Get Started Now</a>
-            <a href="#features" class="btn btn-outline">Explore Tools</a>
-        </div>
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="{{ url('/') }}">🛠️ 3EDTAK - ToolShare</a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
+        <li class="nav-item ms-lg-3">
+          <a href="{{ route('register') }}" class="btn btn-primary btn-sm btn-main text-white">Join Now</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
 
-        <div id="features" class="features">
-            <div class="feature-card">
-                <div class="feature-icon">🛠️</div>
-                <h3>Quality Tools</h3>
-                <p>Access high-end specialized equipment without the high-end price tag.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🛡️</div>
-                <h3>Trusted Sharing</h3>
-                <p>Built-in trust scores and verification system to keep the community safe.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Quick Rental</h3>
-                <p>Seamless booking process with instant availability checks.</p>
-            </div>
+<header class="hero text-center text-md-start">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-7">
+        <h1 class="display-5 fw-bold mb-3">Borrow Specialized Tools From Your Neighbors</h1>
+        <p class="lead mb-4">Don't spend thousands on tools you'll use once. Our community library lets you rent 3D printers, drills, and more safely and affordably.</p>
+        <div class="d-flex gap-3 justify-content-center justify-content-md-start">
+          <a href="{{ route('login') }}" class="btn btn-warning btn-main fw-bold">Browse Tools</a>
+          <a href="{{ route('register') }}" class="btn btn-outline-light btn-main">List Your Tool</a>
         </div>
-    </main>
+      </div>
+      <div class="col-md-5 d-none d-md-block">
+        <div class="bg-white p-4 rounded-4 shadow text-dark">
+          <h6 class="fw-bold border-bottom pb-2">Recently Added</h6>
+          <div class="d-flex justify-content-between py-2">
+            <span>🔹 Bosch Laser Level</span>
+            <span class="text-success fw-bold">30 EGP</span>
+          </div>
+          <div class="d-flex justify-content-between py-2">
+            <span>🔹 Digital Oscilloscope</span>
+            <span class="text-success fw-bold">50 EGP</span>
+          </div>
+          <div class="d-flex justify-content-between py-2">
+            <span>🔹 Industrial Sewing Machine</span>
+            <span class="text-success fw-bold">40 EGP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Why use 3EDTAK - ToolShare?</h2>
+    <p class="text-muted">A secure platform for community resource sharing</p>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="icon-circle">👤</div>
+        <h5 class="fw-bold">Identity Verification</h5>
+        <p class="text-muted small">We use KYC (Know Your Customer) to verify all members before they can borrow high-value tools.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="icon-circle">⭐</div>
+        <h5 class="fw-bold">Trust Score</h5>
+        <p class="text-muted small">Every user has a rating based on their rental history, ensuring the safety of your equipment.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="icon-circle">🛡️</div>
+        <h5 class="fw-bold">Secure Deposits</h5>
+        <p class="text-muted small">We hold a refundable deposit in escrow to protect lenders against any accidental damage.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="p-5 bg-light rounded-4 border">
+    <div class="row align-items-center text-center text-md-start">
+      <div class="col-md-8">
+        <h3 class="fw-bold">System Management</h3>
+        <p class="mb-0">Access different modules for Members, Librarians, and Maintenance staff.</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ route('login') }}" class="btn btn-dark px-4 py-2">Portal Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container text-center">
+    <p class="mb-2">3EDTAK - ToolShare</p>
+    <div class="small opacity-75">
+      <p class="mb-1"></p>
+      <p>Group Project - Spring 2026</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
