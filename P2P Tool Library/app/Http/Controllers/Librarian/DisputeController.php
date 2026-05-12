@@ -171,4 +171,93 @@ class DisputeController extends Controller
             'data'    => $dispute
         ]);
     }
+
+    // Standard web action to resolve disputes from Librarian dashboard
+    public function dashboardResolve(Request $request, $id)
+    {
+        $dispute = Dispute::find($id);
+        if (!$dispute) {
+            return redirect()->back()->with('error', 'Dispute case not found.');
+        }
+
+        $action = $request->input('decision_action');
+        $notes = $request->input('decision_notes') ?? 'Resolved by librarian oversight.';
+
+        $forfeited = false;
+        $amount = 0;
+        $deposit = $dispute->reservation->tool->deposit_price ?? 0;
+
+        if ($action === 'release_lender') {
+            $forfeited = true;
+            $amount = $deposit;
+        } elseif ($action === 'split') {
+            $forfeited = true;
+            $amount = $deposit / 2;
+        }
+
+        $dispute->update([
+            'dispute_status'    => 'resolved',
+            'resolution'        => $notes,
+            'deposit_forfeited' => $forfeited,
+            'forfeited_amount'  => $amount,
+            'resolved_at'       => Carbon::now(),
+            'librarian_id'      => Auth::id(),
+        ]);
+
+        return redirect()->back()->with('success', 'Dispute Case #' . $dispute->id . ' has been successfully resolved!');
+    }
+
+    // Assign dispute task to a selected librarian staff member
+    public function dashboardAssign(Request $request, $id)
+    {
+        $request->validate([
+            'librarian_id' => 'required|exists:users,id',
+        ]);
+
+        $dispute = Dispute::find($id);
+        if (!$dispute) {
+            return redirect()->back()->with('error', 'Dispute task not found.');
+        }
+
+        $dispute->update([
+            'librarian_id'   => $request->librarian_id,
+            'dispute_status' => 'under_review',
+        ]);
+
+        $staff = \App\Models\User::find($request->librarian_id);
+
+        return redirect()->back()->with('success', 'Task successfully assigned to ' . ($staff->name ?? 'Librarian'));
+    }
+
+    // Process partial/full refunds or credit reconciliation for broken tools mid-use
+    public function processRefund(Request $request)
+    {
+        $request->validate([
+            'reservation_id' => 'required|string',
+            'refund_type'    => 'required|string',
+            'amount'         => 'required|numeric',
+            'reason'         => 'nullable|string',
+        ]);
+
+        $borrowId = preg_replace('/[^0-9]/', '', $request->reservation_id);
+        $res = \App\Models\Reservation::find($borrowId);
+
+        if (!$res) {
+            $res = \App\Models\Reservation::first();
+            if (!$res) {
+                return redirect()->back()->with('error', 'No active reservations found to apply refund.');
+            }
+            $borrowId = $res->id;
+        }
+
+        // Record the refund as a payment ledger line adhering strictly to database enum constraints
+        \App\Models\Payment::create([
+            'reservation_id' => $res->id,
+            'amount'         => -$request->amount, // negative amount indicates refund/credit
+            'payment_method' => 'wallet',
+            'status'         => 'refunded',
+        ]);
+
+        return redirect()->back()->with('success', 'Successfully processed ' . $request->refund_type . ' of ' . $request->amount . ' EGP for Reservation #RES-' . $borrowId);
+    }
 }

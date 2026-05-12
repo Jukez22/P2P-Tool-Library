@@ -28,10 +28,9 @@ class Dispute extends Model
         'resolved_at'       => 'datetime',
     ];
 
-    // Associated borrow
-    public function borrow()
+    public function reservation()
     {
-        return $this->belongsTo(Borrow::class, 'borrow_id');
+        return $this->belongsTo(Reservation::class, 'borrow_id');
     }
 
     // The borrower

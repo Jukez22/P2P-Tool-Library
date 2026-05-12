@@ -35,6 +35,11 @@ class ReservationController extends Controller
 
         $tool = Tool::findOrFail($request->tool_id);
         
+        // Prevent users from reserving their own tools
+        if ($tool->owner_id == auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot reserve your own listed tools.');
+        }
+        
         // Calculate total price (simplified logic for demonstration)
         $start = new \DateTime($request->start_datetime);
         $end = new \DateTime($request->end_datetime);

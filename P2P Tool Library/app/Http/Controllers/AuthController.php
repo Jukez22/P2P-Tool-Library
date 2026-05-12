@@ -15,17 +15,37 @@ class AuthController extends Controller
     }
 
     public function login(Request $request)
-{
-    $credential = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-    if (Auth::attempt($credential)) {
-        $request->session()->regenerate();
-        return $this->redirectUserByRole(Auth::user());
+    {
+        $credential = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credential)) {
+            $user = Auth::user();
+            $requestedRole = $request->input('role');
+
+            $isValidRole = false;
+            if ($requestedRole === 'member' && in_array($user->role, ['borrower', 'lender'])) {
+                $isValidRole = true;
+            } elseif ($requestedRole === $user->role) {
+                $isValidRole = true;
+            }
+
+            if (!$isValidRole) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                $displayRole = ucfirst($requestedRole);
+                return back()->withErrors(['email' => "Access Denied: Your account does not have the '$displayRole' role."])->onlyInput('email');
+            }
+
+            $request->session()->regenerate();
+            return $this->redirectUserByRole($user);
+        }
+
+        return back()->withErrors(['email' => 'The credentials are not correct.'])->onlyInput('email');
     }
-    return back()->withErrors(['email' => 'The credentials is not correct.'])->onlyInput('email');
-}
 
 
     public function showRegister()
