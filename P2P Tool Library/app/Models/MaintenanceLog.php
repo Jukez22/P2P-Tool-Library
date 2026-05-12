@@ -14,11 +14,17 @@ class MaintenanceLog extends Model
         'status',
         'technician_id',
         'type',
+        'started_at',
+        'completed_at',
+        'is_successful',
     ];
 
     protected $casts = [
         'date' => 'date',
         'cost' => 'decimal:2',
+        'started_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'is_successful' => 'boolean',
     ];
 
     public $timestamps = false;
