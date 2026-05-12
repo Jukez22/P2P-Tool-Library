@@ -50,6 +50,19 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label fw-bold small">
+              National ID (KYC Verification)
+              @if($user->is_verified)
+                <span class="badge bg-success ms-2">✓ Verified</span>
+              @else
+                <span class="badge bg-secondary ms-2">Not Verified</span>
+              @endif
+            </label>
+            <input type="text" name="national_id" class="form-control" value="{{ old('national_id', $user->national_id) }}" placeholder="14-digit National ID"/>
+            <div class="form-text small">Unlock high-value tools by providing your National ID.</div>
+          </div>
+
+          <div class="mb-3">
             <label class="form-label fw-bold small">Membership Tier</label>
             <input type="text" class="form-control bg-light" value="{{ $user->membershipTier->name ?? 'None' }}" disabled/>
           </div>

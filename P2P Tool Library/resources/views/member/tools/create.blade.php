@@ -52,16 +52,34 @@
           <div class="mb-3">
             <label class="form-label fw-bold small">Condition</label>
             <select name="condition_status" class="form-select" required>
-              <option value="Excellent">Excellent</option>
-              <option value="Good">Good</option>
-              <option value="Fair">Fair</option>
-              <option value="Needs Repair">Needs Repair</option>
+              <option value="new">New</option>
+              <option value="good">Good</option>
+              <option value="fair">Fair</option>
+              <option value="poor">Poor</option>
             </select>
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-bold small">Full Description</label>
             <textarea name="description" class="form-control" rows="5" placeholder="Describe the tool, its features, and any rules for usage..." required></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-info">Compatibility Tags (Optional)</label>
+            <input type="text" name="compatibility_tags" class="form-control" placeholder="e.g. SDS Plus, M18 Battery, 10-inch Blade"/>
+            <div class="form-text small">List parts or standards this tool is compatible with, separated by commas.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-primary">Documentation (Optional)</label>
+            <div class="input-group mb-2">
+              <span class="input-group-text small">📄 Manual URL</span>
+              <input type="url" name="manual_url" class="form-control" placeholder="Link to PDF manual"/>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text small">🎥 Video URL</span>
+              <input type="url" name="video_url" class="form-control" placeholder="Link to safety video"/>
+            </div>
           </div>
 
           <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">List Tool Now</button>

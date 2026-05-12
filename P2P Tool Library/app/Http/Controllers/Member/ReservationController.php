@@ -19,31 +19,63 @@ class ReservationController extends Controller
             ->orWhereHas('tool', function ($query) use ($userId) {
                 $query->where('owner_id', $userId);
             })
-            ->with(['tool', 'borrower']) // Optional: load relationships for better UI
+            ->with(['tool.owner', 'borrower'])
             ->get();
 
-        return response()->json($reservations);
+        return view('member.dashboard', compact('reservations'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'tool_id' => 'required|integer',
-            'start_datetime' => 'required|date',
-            'end_datetime' => 'required|date|after:start_datetime',
-            'total_price' => 'required|numeric',
+            'tool_id' => 'required|exists:tools,id',
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after:start_date',
         ]);
 
-        $reservation = Reservation::create([
+        $tool = Tool::findOrFail($request->tool_id);
+        
+        // BUFFER PERIOD LOGIC (1 Day)
+        $requestedStart = new \DateTime($request->start_date);
+        $requestedEnd = new \DateTime($request->end_date);
+
+        // Check for overlaps with existing reservations + 1 day buffer
+        $existingReservations = Reservation::where('tool_id', $request->tool_id)
+            ->whereIn('status', ['Pending', 'Active', 'Confirmed'])
+            ->get();
+
+        foreach ($existingReservations as $res) {
+            $resStart = (new \DateTime($res->start_datetime))->modify('-1 day'); // Buffer before
+            $resEnd = (new \DateTime($res->end_datetime))->modify('+1 day');   // Buffer after
+
+            // Overlap check: (StartA <= EndB) and (EndA >= StartB)
+            if ($requestedStart <= $resEnd && $requestedEnd >= $resStart) {
+                return back()->withErrors(['dates' => 'This tool is unavailable during these dates due to other bookings or cleaning buffer periods (1 day).']);
+            }
+        }
+
+        // Calculate days for pricing
+        $days = $requestedStart->diff($requestedEnd)->days;
+        if($days == 0) $days = 1;
+
+        $total_price = $days * $tool->price;
+        $deposit_amount = $tool->deposit_price;
+
+        Reservation::create([
             'tool_id'        => $request->tool_id,
-            'borrower_id'    => auth()->id(), // Securely get the logged-in user's ID
-            'start_datetime' => $request->start_datetime,
-            'end_datetime'   => $request->end_datetime,
-            'total_price'    => $request->total_price,
-            'status'         => 'Pending', // Set default status to Pending
+            'borrower_id'    => auth()->id(),
+            'start_datetime' => $request->start_date,
+            'end_datetime'   => $request->end_date,
+            'total_price'    => $total_price,
+            'deposit_amount' => $deposit_amount,
+            'status'         => 'Pending',
         ]);
 
-        return response()->json($reservation, 201);
+        // Update user escrow
+        $user = auth()->user();
+        $user->increment('escrow_balance', $deposit_amount);
+
+        return redirect()->route('member.dashboard')->with('success', 'Reservation request sent! ' . $deposit_amount . ' EGP held in escrow.');
     }
 
     public function show($id)
@@ -110,7 +142,7 @@ class ReservationController extends Controller
 
         $reservation->delete();
 
-        return response()->json(['message' => 'Reservation deleted successfully']);
+        return back()->with('success', 'Reservation cancelled successfully.');
     }
 }
 

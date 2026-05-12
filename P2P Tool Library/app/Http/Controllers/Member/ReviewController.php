@@ -31,6 +31,11 @@ class ReviewController extends Controller
             'trust_score' => round($averageRating, 1)
         ]);
 
+        // AUTOMATIC MEMBERSHIP UPGRADE
+        if ($reviewedUser->trust_score >= 4.5 && $reviewedUser->membership_tier_id == 1) {
+            $reviewedUser->update(['membership_tier_id' => 2]); // Assuming 2 is Pro
+        }
+
         return back()->with('message', 'Review submitted and Trust Score updated!');
     }
 }

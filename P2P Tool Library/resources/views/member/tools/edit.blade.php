@@ -59,10 +59,10 @@
           <div class="mb-3">
             <label class="form-label fw-bold small">Condition</label>
             <select name="condition_status" class="form-select" required>
-              <option value="Excellent" {{ $tool->condition_status == 'Excellent' ? 'selected' : '' }}>Excellent</option>
-              <option value="Good" {{ $tool->condition_status == 'Good' ? 'selected' : '' }}>Good</option>
-              <option value="Fair" {{ $tool->condition_status == 'Fair' ? 'selected' : '' }}>Fair</option>
-              <option value="Needs Repair" {{ $tool->condition_status == 'Needs Repair' ? 'selected' : '' }}>Needs Repair</option>
+              <option value="new" {{ $tool->condition_status == 'new' ? 'selected' : '' }}>New</option>
+              <option value="good" {{ $tool->condition_status == 'good' ? 'selected' : '' }}>Good</option>
+              <option value="fair" {{ $tool->condition_status == 'fair' ? 'selected' : '' }}>Fair</option>
+              <option value="poor" {{ $tool->condition_status == 'poor' ? 'selected' : '' }}>Poor</option>
             </select>
           </div>
 

@@ -167,9 +167,11 @@
                   <td>{{ $reservation->start_datetime->format('M d') }}–{{ $reservation->end_datetime->format('d') }}</td>
                   <td class="fw-bold text-primary">{{ $reservation->total_price }} EGP</td>
                   <td><span class="badge {{ $reservation->status == 'Active' ? 'bg-success' : 'bg-warning text-dark' }}">{{ $reservation->status }}</span></td>
-                  <td>
                     @if($reservation->status == 'Active')
-                    <button class="btn btn-primary btn-sm">Return</button>
+                      <div class="d-flex flex-column gap-1">
+                        <button class="btn btn-primary btn-sm">Return</button>
+                        <a href="{{ route('member.reports.create', ['reservation_id' => $reservation->id, 'tool_id' => $reservation->tool_id]) }}" class="text-danger small text-decoration-none fw-bold" style="font-size: 0.65rem;">Report Problem</a>
+                      </div>
                     @else
                     <button class="btn btn-outline-secondary btn-sm">Details</button>
                     @endif
@@ -323,20 +325,26 @@
         <div class="fw-bold fs-5 mb-1">Deposit & Escrow</div>
         <div class="text-secondary small mb-3">Insurance deposits held securely</div>
         <div class="row g-3 mb-4 text-center">
-          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">1,700 EGP</div><small class="text-secondary">Held in Escrow</small></div></div>
-          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">3,200 EGP</div><small class="text-secondary">Total Released</small></div></div>
-          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-danger">0 EGP</div><small class="text-secondary">Forfeited</small></div></div>
+          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">{{ number_format($user->escrow_balance, 2) }} EGP</div><small class="text-secondary">Held in Escrow</small></div></div>
+          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">{{ number_format($user->reservations->where('status', 'Completed')->sum('deposit_amount'), 2) }} EGP</div><small class="text-secondary">Total Released</small></div></div>
+          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-danger">0.00 EGP</div><small class="text-secondary">Forfeited</small></div></div>
         </div>
         <div class="card">
-          <div class="card-header bg-light fw-bold small">Transactions</div>
+          <div class="card-header bg-light fw-bold small">Active Escrow Transactions</div>
           <div class="card-body p-0">
             <table class="table table-hover mb-0 small text-center align-middle">
-              <thead class="table-light"><tr><th>Tool</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+              <thead class="table-light"><tr><th>Tool</th><th>Status</th><th>Deposit Amount</th><th>Escrow Status</th></tr></thead>
               <tbody>
-                <tr><td>🔩 Milwaukee Power Drill</td><td>May 3</td><td class="text-primary fw-bold">200 EGP</td><td><span class="badge bg-warning text-dark">Held</span></td></tr>
-                <tr><td>🪚 Tile Saw</td><td>May 3</td><td class="text-primary fw-bold">500 EGP</td><td><span class="badge bg-warning text-dark">Held</span></td></tr>
-                <tr><td>📷 Thermal Camera</td><td>May 4</td><td class="text-primary fw-bold">1,000 EGP</td><td><span class="badge bg-warning text-dark">Held</span></td></tr>
-                <tr><td>🔬 Oscilloscope</td><td>Apr 23</td><td class="text-primary fw-bold">400 EGP</td><td><span class="badge bg-success">Released</span></td></tr>
+                @forelse($user->reservations->whereIn('status', ['Pending', 'Active']) as $res)
+                <tr>
+                  <td>🔩 {{ $res->tool->title }}</td>
+                  <td><span class="badge bg-info text-dark">{{ $res->status }}</span></td>
+                  <td class="text-primary fw-bold">{{ number_format($res->deposit_amount, 2) }} EGP</td>
+                  <td><span class="badge bg-warning text-dark">Held</span></td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="text-center text-muted">No active escrow holdings.</td></tr>
+                @endforelse
               </tbody>
             </table>
           </div>
@@ -351,42 +359,47 @@
             <div class="card p-3">
               <div class="fw-bold small mb-2">Your Referral Link</div>
               <div class="input-group mb-3">
-                <input type="text" class="form-control form-control-sm bg-light" value="toolshare.eg/ref/AHMED42" readonly/>
+                <input type="text" class="form-control form-control-sm bg-light" value="3edtak.com/ref/{{ $user->referral_code }}" readonly/>
                 <button class="btn btn-primary btn-sm" onclick="alert('Copied!')">Copy</button>
               </div>
-              <div class="bg-primary bg-opacity-10 p-3 rounded text-center border border-primary"><div class="fs-4 fw-bold text-primary">150 EGP</div><small class="text-secondary">Available Credits</small></div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card">
-              <div class="card-header bg-light fw-bold small">Referral History</div>
-              <div class="card-body p-0">
-                <table class="table mb-0 small">
-                  <thead class="table-light"><tr><th>Name</th><th>Joined</th><th>Credit</th></tr></thead>
-                  <tbody>
-                    <tr><td>Karim Amin</td><td>Apr 12</td><td class="text-success fw-bold">+50 EGP</td></tr>
-                    <tr><td>Nour Fathy</td><td>Apr 28</td><td class="text-success fw-bold">+50 EGP</td></tr>
-                    <tr><td>Rania Mostafa</td><td>Pending</td><td><span class="badge bg-secondary">Pending</span></td></tr>
-                  </tbody>
-                </table>
+              <div class="bg-primary bg-opacity-10 p-3 rounded text-center border border-primary">
+                <div class="fs-4 fw-bold text-primary">{{ number_format($user->referral_balance, 2) }} EGP</div>
+                <small class="text-secondary">Available Credits</small>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
 
       <div class="panel" id="panel-membership">
-        <div class="fw-bold fs-5 mb-1">Membership</div>
-        <div class="text-secondary small mb-3">Upgrade your tier to unlock features</div>
-        <div class="row g-3" style="max-width:500px;">
-              <h4 class="fw-bold">REACH 4.5★ TO UNLOCK PRO FEATURES</h2>
-
-       <!--   <div class="col-6"><div class="card p-3 h-100 border-2 border-primary border-opacity-10 shadow-sm"><div class="text-secondary small mb-1 uppercase fw-bold" style="font-size:0.6rem;">CURRENT</div><div class="fs-5 fw-bold mb-2">Casual</div><div class="text-secondary small">✓ 3 borrows/month<br/>✓ Standard pricing<br/>✗ No priority</div></div></div>
-          <div class="col-6"><div class="card p-3 h-100 border-2 border-primary shadow-sm"><div class="text-primary small mb-1 uppercase fw-bold" style="font-size:0.6rem;">UPGRADE TO</div><div class="fs-5 fw-bold text-primary mb-1">Pro</div><div class="text-secondary small mb-1 fw-bold">150 EGP/month</div><div class="text-secondary small mb-3">✓ Unlimited borrows<br/>✓ 20% off rentals<br/>✓ Priority access</div><button class="btn btn-primary btn-sm w-100 fw-bold">Upgrade Now</button></div></div>-->
+        <div class="fw-bold fs-5 mb-1">Membership Status</div>
+        <div class="text-secondary small mb-3">Your current tier: <b>{{ $user->membershipTier->name ?? 'Casual' }}</b></div>
+        
+        <div class="card p-4" style="max-width:500px;">
+          @if(($user->trust_score ?? 0) >= 4.5)
+            <div class="text-center">
+              <div class="fs-1">🏅</div>
+              <h4 class="fw-bold text-primary">Pro Member</h4>
+              <p class="text-secondary small">Congratulations! You've unlocked all Pro features including 20% discount on all rentals.</p>
+            </div>
+          @else
+            <h6 class="fw-bold small mb-3">ROAD TO PRO MEMBERSHIP</h6>
+            <div class="d-flex justify-content-between small mb-2">
+              <span>Trust Score Progress</span>
+              <span class="fw-bold text-primary">{{ $user->trust_score ?? 0 }} / 4.5</span>
+            </div>
+            <div class="progress mb-3" style="height: 12px;">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: {{ min((($user->trust_score ?? 0) / 4.5) * 100, 100) }}%"></div>
+            </div>
+            <p class="small text-secondary italic">Reach 4.5 ★ to unlock unlimited borrowings and priority support.</p>
+          @endif
         </div>
       </div>
 
-    </div></div></div>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>

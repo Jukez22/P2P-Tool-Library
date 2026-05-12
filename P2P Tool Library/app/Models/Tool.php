@@ -16,10 +16,13 @@ class Tool extends Model
         'location_lat',
         'category_id',
         'owner_id',
+        'deposit_price',
+        'compatibility_tags',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'deposit_price' => 'decimal:2',
         'is_boosted' => 'boolean',
         'location_lng' => 'decimal:7',
         'location_lat' => 'decimal:7',

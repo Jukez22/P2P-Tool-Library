@@ -30,14 +30,21 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'name'    => 'sometimes|required|string|max:50',
-            'phone'   => 'sometimes|required|string|max:20',
-            'address' => 'sometimes|nullable|string|max:255',
+            'name'        => 'sometimes|required|string|max:50',
+            'phone'       => 'sometimes|required|string|max:20',
+            'address'     => 'sometimes|nullable|string|max:255',
+            'national_id' => 'sometimes|nullable|string|max:20',
         ]);
 
-        $user->update($request->only(['name', 'phone', 'address']));
+        $user->update([
+            'name'        => $request->name,
+            'phone'       => $request->phone,
+            'address'     => $request->address,
+            'national_id' => $request->national_id,
+            'is_verified' => $request->national_id ? 1 : 0,
+        ]);
 
-        return back()->with('message', 'Profile updated successfully');
+        return back()->with('message', 'Profile and Verification updated successfully');
     }
 
     // Change the user's password securely

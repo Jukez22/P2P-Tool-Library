@@ -33,12 +33,22 @@
   <div class="row g-4">
     @forelse($tools as $tool)
       <div class="col-md-3">
-        <div class="card tool-card">
-          <div class="tool-img">🛠️</div>
-          <div class="card-body">
-            <span class="badge bg-light text-primary mb-2">{{ $tool->category->name ?? 'Uncategorized' }}</span>
-            <h5 class="card-title fw-bold mb-1">{{ $tool->title }}</h5>
-            <p class="text-secondary small mb-3">By {{ $tool->owner->name }}</p>
+          <div class="card tool-card">
+            <div class="tool-img">
+              🛠️
+              @if($tool->is_boosted)
+                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">★ Boosted</span>
+              @endif
+            </div>
+            <div class="card-body">
+              <span class="badge bg-light text-primary mb-2">{{ $tool->category->name ?? 'Uncategorized' }}</span>
+              <h5 class="card-title fw-bold mb-1">{{ $tool->title }}</h5>
+              <p class="text-secondary small mb-3">
+                By {{ $tool->owner->name }}
+                @if(isset($tool->distance))
+                   · {{ round($tool->distance, 1) }} km away
+                @endif
+              </p>
             <div class="d-flex justify-content-between align-items-center">
               <span class="fw-bold text-primary">{{ $tool->price }} EGP/day</span>
               <a href="{{ route('member.tools.show', $tool->id) }}" class="btn btn-primary btn-sm px-3">View</a>

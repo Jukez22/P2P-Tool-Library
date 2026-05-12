@@ -40,6 +40,49 @@
         
         <h5 class="fw-bold">Description</h5>
         <p class="text-secondary">{{ $tool->description }}</p>
+
+        @if($tool->documents->count() > 0)
+          <hr/>
+          <h6 class="fw-bold small text-primary mb-3">DOCUMENTATION & SAFETY</h6>
+          <div class="d-flex gap-3">
+            @foreach($tool->documents as $doc)
+              @if($doc->type == 'manual')
+                <a href="{{ $doc->file_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">📄 View Manual</a>
+              @elseif($doc->type == 'video')
+                <a href="{{ $doc->file_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">🎥 Safety Video</a>
+              @endif
+            @endforeach
+          </div>
+        @endif
+
+        <hr/>
+        <div class="bg-light p-3 rounded">
+          <h6 class="fw-bold small mb-2">⚙️ COMPATIBILITY CHECKER</h6>
+          <p class="small text-secondary mb-3">Enter your <b>Project Type</b> (e.g. Concrete, Wood) or a <b>Part</b> to see if this tool fits.</p>
+          <div class="input-group input-group-sm">
+            <input type="text" id="comp_search" class="form-control" placeholder="Search (e.g. Concrete, M18 Battery)..."/>
+            <button class="btn btn-primary" onclick="checkComp()">Check</button>
+          </div>
+          <div id="comp_result" class="mt-2 small fw-bold" style="display:none;"></div>
+          <input type="hidden" id="comp_tags" value="{{ strtolower($tool->compatibility_tags) }}"/>
+        </div>
+
+        <script>
+          function checkComp() {
+            let search = document.getElementById('comp_search').value.toLowerCase().trim();
+            let tags = document.getElementById('comp_tags').value;
+            let resultDiv = document.getElementById('comp_result');
+            
+            if(search === "") return;
+            
+            resultDiv.style.display = 'block';
+            if(tags.includes(search)) {
+              resultDiv.innerHTML = '<span class="text-success">✅ Compatible! This part matches the tool specifications.</span>';
+            } else {
+              resultDiv.innerHTML = '<span class="text-warning">⚠️ Caution: Not found in compatibility list. Check manual.</span>';
+            }
+          }
+        </script>
         
         <div class="row mt-4">
           <div class="col-6">
