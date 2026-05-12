@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Date;
 
 class User extends Authenticatable
 {
@@ -31,9 +32,7 @@ class User extends Authenticatable
         'trust_score'        => 'float',
     ];
 
-    /**
-     * Get the membership tier that the user belongs to.
-     */
+    // User tier
     public function membershipTier()
     {
         return $this->belongsTo(MembershipTier::class);

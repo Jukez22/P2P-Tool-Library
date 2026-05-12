@@ -53,13 +53,16 @@ class ReservationController extends Controller
         return redirect()->route('member.dashboard')->with('success', 'Tool borrowed successfully!');
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $userId = auth()->id();
         $reservation = Reservation::with('tool')->find($id);
 
         if (!$reservation) {
-            return response()->json(['message' => 'Reservation not found'], 404);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Reservation not found'], 404);
+            }
+            abort(404);
         }
 
         // Authorization: Must be borrower or tool owner
@@ -110,6 +113,24 @@ class ReservationController extends Controller
         $reservation->delete();
 
         return redirect()->route('member.dashboard')->with('success', 'Reservation cancelled successfully!');
+    }
+
+    // Get the raw QR string for a reservation
+    public function getReservationQR($id)
+    {
+        $reservation = Reservation::with('handoverVerification')->find($id);
+
+        if (!$reservation) {
+            return response()->json(['message' => 'Reservation not found'], 404);
+        }
+
+        if (!$reservation->handoverVerification) {
+            return response()->json(['message' => 'Handover verification not found'], 404);
+        }
+
+        return response()->json([
+            'qr_code' => $reservation->handoverVerification->qr_code
+        ]);
     }
 }
 

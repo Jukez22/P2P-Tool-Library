@@ -8,23 +8,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request for Authorization.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string $role
-     */
+    // Handle role-based authorization
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (!auth()->check()) {
             return redirect('login');
         }
 
-        $userRole = auth()->user()->role; // 'lender', 'borrower', 'librarian', 'technician'
+        $userRole = auth()->user()->role;
 
         // Basic authorization check
         if ($userRole !== $role) {
-            abort(403, 'Unauthorized Access. You do not have the required role.');
+            abort(403, 'Unauthorized Access.');
         }
 
         return $next($request);

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    // List all reports submitted by the logged-in user
+    // List user reports
     public function index()
     {
         $reports = Report::where('reporter_id', Auth::id())->get();
@@ -59,7 +59,7 @@ class ReportController extends Controller
         return redirect()->route('member.dashboard')->with('success', 'Damage report submitted. Our team will review it soon.');
     }
 
-    // View a single report (only if it belongs to the logged-in user)
+    // View specific report
     public function show($id)
     {
         $report = Report::where('id', $id)
@@ -73,7 +73,7 @@ class ReportController extends Controller
         return response()->json($report);
     }
 
-    // Delete a report (only if it is still pending and belongs to the user)
+    // Delete pending report
     public function destroy($id)
     {
         $report = Report::where('id', $id)
@@ -85,7 +85,7 @@ class ReportController extends Controller
         }
 
         if ($report->status !== 'pending') {
-            return response()->json(['message' => 'Cannot delete a report that has already been reviewed'], 403);
+            return response()->json(['message' => 'Reviewed reports cannot be deleted'], 403);
         }
 
         $report->delete();

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckIfUserSuspended;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,4 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
+    })
+    ->withSchedule(function ($schedule) {
+        $schedule->command('app:expire-inventory-audits')->hourly();
+        $schedule->command('app:process-late-returns')->daily();
+        $schedule->command('app:refresh-dashboard-metrics')->everyFiveMinutes();
     })->create();

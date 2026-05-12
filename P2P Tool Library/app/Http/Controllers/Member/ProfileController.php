@@ -9,19 +9,17 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    // View the logged-in user's profile
+    // View profile
     public function show()
     {
-        /** @var \App\Models\User $user */
         $user = Auth::user();
         $user->load('membershipTier');
         return response()->json($user);
     }
 
-    // Update profile info (name, phone, address only)
+    // Update profile
     public function update(Request $request)
     {
-        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         $request->validate([
@@ -49,7 +47,7 @@ class ProfileController extends Controller
         return back()->with('success', 'Profile and Verification updated successfully');
     }
 
-    // Change the user's password securely
+    // Change password
     public function changePassword(Request $request)
     {
         $request->validate([
@@ -57,10 +55,9 @@ class ProfileController extends Controller
             'new_password'          => 'required|string|min:8|confirmed',
         ]);
 
-        /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Verify the current password is correct
+        // Check current password
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'message' => 'Current password is incorrect'

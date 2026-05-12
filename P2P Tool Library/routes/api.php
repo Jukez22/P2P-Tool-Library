@@ -1,5 +1,14 @@
 <?php
 
+use App\Http\Controllers\Member\ReservationController;
+use App\Http\Controllers\Member\ToolController;
+use App\Http\Controllers\HandoverController;
+use App\Http\Controllers\InventoryAuditController;
+use App\Http\Controllers\DisputeController;
+use App\Http\Controllers\LateReturnController;
+use App\Http\Controllers\InsuranceClaimController;
+use App\Http\Controllers\ToolCategoryController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

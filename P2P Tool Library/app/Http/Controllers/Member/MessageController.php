@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
-    // List all people the logged-in user has had conversations with
+    // Conversations list
     public function index()
     {
         $userId = Auth::id();
@@ -27,7 +27,7 @@ class MessageController extends Controller
         return view('member.messages.index', compact('contacts'));
     }
 
-    // View the chat history with a specific person
+    // View chat history
     public function show($contactId)
     {
         $userId = Auth::id();
@@ -51,7 +51,7 @@ class MessageController extends Controller
         return view('member.messages.show', compact('messages', 'contact'));
     }
 
-    // Send a new message
+    // Send message
     public function store(Request $request)
     {
         $request->validate([
