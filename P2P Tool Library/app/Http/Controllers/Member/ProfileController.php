@@ -9,18 +9,13 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    // View the logged-in user's profile edit page
-    public function edit()
+    // View the logged-in user's profile
+    public function show()
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $user->load('membershipTier');
-        return view('member.profile.edit', compact('user'));
-    }
-
-    public function show()
-    {
-        return redirect()->route('member.profile.edit');
+        return response()->json($user);
     }
 
     // Update profile info (name, phone, address only)
@@ -44,7 +39,14 @@ class ProfileController extends Controller
             'is_verified' => $request->national_id ? 1 : 0,
         ]);
 
+<<<<<<< HEAD
         return back()->with('message', 'Profile and Verification updated successfully');
+=======
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user'    => $user,
+        ]);
+>>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973
     }
 
     // Change the user's password securely
@@ -69,6 +71,8 @@ class ProfileController extends Controller
             'password' => Hash::make($request->new_password),
         ]);
 
-        return back()->with('message', 'Password changed successfully');
+        return response()->json([
+            'message' => 'Password changed successfully'
+        ]);
     }
 }

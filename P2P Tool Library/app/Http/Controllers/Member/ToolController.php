@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tool;
+<<<<<<< HEAD
 use App\Models\User;
 use App\Models\Category;
 use App\Models\ToolDocument;
+=======
+>>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973
 use Illuminate\Http\Request;
 
 class ToolController extends Controller
 {
+<<<<<<< HEAD
     public function index(Request $request)
     {
         $query = Tool::with('category', 'owner');
@@ -38,6 +42,12 @@ class ToolController extends Controller
     {
         $categories = Category::all();
         return view('member.tools.create', compact('categories'));
+=======
+     public function index()
+    {
+        $tools = Tool::all();
+        return response()->json($tools);
+>>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973
     }
 
     public function store(Request $request)
@@ -55,14 +65,16 @@ class ToolController extends Controller
             'price'            => $request->price,
             'description'      => $request->description,
             'condition_status' => $request->condition_status,
+            'location_lat'     => $request->location_lat,
+            'location_lng'     => $request->location_lng,
             'category_id'      => $request->category_id,
-            'owner_id'         => auth()->id(),
             'is_boosted'       => false,
             'location_lat'     => $request->lat ?? 30.0444,
             'location_lng'     => $request->lng ?? 31.2357,
             'compatibility_tags' => $request->compatibility_tags,
         ]);
 
+<<<<<<< HEAD
         // Save Documentation if provided
         if ($request->manual_url) {
             ToolDocument::create([
@@ -80,24 +92,26 @@ class ToolController extends Controller
         }
 
         return redirect()->route('member.dashboard')->with('success', 'Tool listed successfully with documentation!');
+=======
+        return response()->json($tool, 201);
+>>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973
     }
 
     public function show($id)
     {
+<<<<<<< HEAD
         $tool = Tool::with(['category', 'owner', 'documents'])->findOrFail($id);
         return view('member.tools.show', compact('tool'));
     }
+=======
+        $tool = Tool::find($id);
+>>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973
 
-    public function edit($id)
-    {
-        $tool = Tool::findOrFail($id);
-        
-        if ($tool->owner_id !== auth()->id()) {
-            abort(403);
+        if (!$tool) {
+            return response()->json(['message' => 'Tool not found'], 404);
         }
 
-        $categories = Category::all();
-        return view('member.tools.edit', compact('tool', 'categories'));
+        return response()->json($tool);
     }
 
     public function update(Request $request, $id)
@@ -106,10 +120,6 @@ class ToolController extends Controller
 
         if (!$tool) {
             return response()->json(['message' => 'Tool not found'], 404);
-        }
-
-        if ($tool->owner_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $request->validate([
@@ -121,10 +131,15 @@ class ToolController extends Controller
         ]);
 
         $tool->update($request->only([
+<<<<<<< HEAD
             'title', 'price', 'description', 'condition_status', 'category_id', 'compatibility_tags'
+=======
+            'title', 'price', 'description', 'condition_status', 
+            'location_lat', 'location_lng', 'category_id', 'is_boosted'
+>>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973
         ]));
 
-        return redirect()->route('member.dashboard')->with('success', 'Tool updated successfully!');
+        return response()->json($tool);
     }
 
     public function destroy($id)
@@ -135,13 +150,9 @@ class ToolController extends Controller
             return response()->json(['message' => 'Tool not found'], 404);
         }
 
-        if ($tool->owner_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
         $tool->delete();
 
-        return redirect()->route('member.dashboard')->with('success', 'Tool deleted successfully!');
+        return response()->json(['message' => 'Tool deleted successfully']);
     }
 }
 
