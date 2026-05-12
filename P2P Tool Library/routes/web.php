@@ -90,6 +90,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('trigger/store', [MaintenanceController::class, 'store'])->name('trigger.store');
 
+        Route::post('queue/start', [MaintenanceController::class, 'startWork'])->name('queue.start');
+        Route::post('queue/complete', [MaintenanceController::class, 'completeWork'])->name('queue.complete');
+
         Route::resource('safety', SafetyController::class);
         Route::post('safety/renew',   [SafetyController::class, 'updateSafetyCertification'])->name('safety.renew');
         Route::post('safety/lockout', [SafetyController::class, 'markUnfit'])->name('safety.lockout');
