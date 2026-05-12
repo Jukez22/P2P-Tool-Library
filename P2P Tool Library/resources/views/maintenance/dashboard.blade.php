@@ -86,13 +86,34 @@
               @forelse($queue as $log)
               <tr>
                 <td class="fw-bold">{{ $log->tool->title }}</td>
-                <td>{{ $log->notes ?? 'Routine maintenance check' }}</td>
+                <td>{{ $log->description ?? 'Routine maintenance check' }}</td>
                 <td>
                     @php $score = rand(70, 99); @endphp
                     <span class="badge {{ $score > 90 ? 'bg-danger' : 'bg-warning text-dark' }}">{{ $score }}/100</span>
                 </td>
                 <td>{{ $log->technician_id ? 'Assigned' : 'Unassigned' }}</td>
-                <td><button class="btn btn-primary btn-sm px-3">Start Work</button></td>
+                <td>
+                  @if($log->status === 'scheduled')
+                    <form action="{{ route('maintenance.queue.start') }}" method="POST" class="d-inline">
+                      @csrf
+                      <input type="hidden" name="log_id" value="{{ $log->id }}">
+                      <button type="submit" class="btn btn-primary btn-sm px-3">Start Work</button>
+                    </form>
+                  @elseif($log->status === 'in-progress')
+                    <form action="{{ route('maintenance.queue.complete') }}" method="POST" class="d-inline">
+                      @csrf
+                      <input type="hidden" name="log_id" value="{{ $log->id }}">
+                      <input type="hidden" name="is_successful" value="1">
+                      <button type="submit" class="btn btn-success btn-sm px-2">✓ Done</button>
+                    </form>
+                    <form action="{{ route('maintenance.queue.complete') }}" method="POST" class="d-inline">
+                      @csrf
+                      <input type="hidden" name="log_id" value="{{ $log->id }}">
+                      <input type="hidden" name="is_successful" value="0">
+                      <button type="submit" class="btn btn-outline-danger btn-sm px-2">✗ Failed</button>
+                    </form>
+                  @endif
+                </td>
               </tr>
               @empty
               <tr><td colspan="5" class="text-center text-muted p-4">No tools in the queue. Everything is healthy!</td></tr>
@@ -163,7 +184,7 @@
               @foreach($safetyTools as $t)
               <tr>
                 <td class="fw-bold">{{ $t->title }}</td>
-                <td>{{ $t->updated_at->format('M Y') }}</td>
+                <td>{{ $t->created_at ? $t->created_at->format('M Y') : 'N/A' }}</td>
                 <td>{{ $t->safety_cert_expiry_date ? $t->safety_cert_expiry_date->format('M d, Y') : 'N/A' }}</td>
                 <td>
                   @if($t->safety_cert_expiry_date && $t->safety_cert_expiry_date->isPast())
@@ -212,7 +233,7 @@
               @foreach($toolsForTriggers->where('is_unfit', true) as $t)
               <tr>
                 <td class="fw-bold text-danger">{{ $t->title }}</td>
-                <td>{{ $t->updated_at->format('M d') }}</td>
+                <td>{{ $t->created_at ? $t->created_at->format('M d') : 'N/A' }}</td>
                 <td>{{ ucfirst($t->condition_status) }}</td>
                 <td><span class="badge bg-dark">LOCKED</span></td>
                 <td>
@@ -277,7 +298,7 @@
                 <select class="form-select" id="estIssue" onchange="calcEstimate()">
                   <option value="">-- Select Issue --</option>
                   @foreach($estimates as $est)
-                  <option value="{{ $est->estimated_total }}" data-parts="{{ $est->parts_cost }}" data-labor="{{ $est->labor_cost }}">{{ $est->issue_name }}</option>
+                  <option value="{{ $est->estimated_cost }}" data-parts="{{ number_format($est->estimated_cost * 0.6, 2) }}" data-labor="{{ number_format($est->estimated_cost * 0.4, 2) }}">{{ $est->issue_name }}</option>
                   @endforeach
                 </select>
               </div>
@@ -300,9 +321,9 @@
                   @foreach($estimates->take(8) as $est)
                   <tr>
                     <td>{{ $est->issue_name }}</td>
-                    <td>{{ $est->parts_cost }}</td>
-                    <td>{{ $est->labor_cost }}</td>
-                    <td class="fw-bold text-primary">{{ $est->estimated_total }} EGP</td>
+                    <td>{{ number_format($est->estimated_cost * 0.6, 2) }}</td>
+                    <td>{{ number_format($est->estimated_cost * 0.4, 2) }}</td>
+                    <td class="fw-bold text-primary">{{ number_format($est->estimated_cost, 2) }} EGP</td>
                   </tr>
                   @endforeach
                 </tbody>
@@ -398,10 +419,10 @@
               @forelse($consumables as $item)
               <tr>
                 <td class="fw-bold">{{ $item->name }}</td>
-                <td>{{ $item->current_stock ?? 0 }} {{ $item->unit ?? '' }}</td>
-                <td>{{ $item->min_stock_level ?? 1 }} {{ $item->unit ?? '' }}</td>
+                <td>{{ $item->stock_level ?? 0 }} {{ $item->unit ?? '' }}</td>
+                <td>{{ $item->reorder_threshold ?? 1 }} {{ $item->unit ?? '' }}</td>
                 <td>
-                  @if(($item->current_stock ?? 0) <= ($item->min_stock_level ?? 1))
+                  @if(($item->stock_level ?? 0) <= ($item->reorder_threshold ?? 1))
                     <span class="badge bg-danger">Low Stock</span>
                   @else
                     <span class="badge bg-success">OK</span>
@@ -483,16 +504,17 @@
           <div class="col-md-8">
             <div class="card overflow-hidden">
               <table class="table table-hover align-middle mb-0">
-                <thead class="table-light"><tr><th>Article Title</th><th>Author</th><th>Created</th></tr></thead>
+                <thead class="table-light"><tr><th>Article Title</th><th>Content Snippet</th><th>Author</th><th>Created</th></tr></thead>
                 <tbody>
                   @forelse($articles as $article)
                   <tr>
                     <td class="fw-bold">{{ $article->title }}</td>
+                    <td class="text-muted small">{{ Str::limit($article->content, 50) }}</td>
                     <td>{{ $article->author_id ?? 'System' }}</td>
                     <td>{{ $article->created_at ? $article->created_at->format('M d, Y') : '—' }}</td>
                   </tr>
                   @empty
-                  <tr><td colspan="3" class="text-center text-muted p-4">No articles in the knowledge base yet.</td></tr>
+                  <tr><td colspan="4" class="text-center text-muted p-4">No articles in the knowledge base yet.</td></tr>
                   @endforelse
                 </tbody>
               </table>

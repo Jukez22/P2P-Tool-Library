@@ -83,6 +83,10 @@ Route::middleware(['auth'])->group(function () {
         // Usage trigger threshold
         Route::post('trigger/store', [MaintenanceController::class, 'store'])->name('trigger.store');
 
+        // Queue actions
+        Route::post('queue/start', [MaintenanceController::class, 'startWork'])->name('queue.start');
+        Route::post('queue/complete', [MaintenanceController::class, 'completeWork'])->name('queue.complete');
+
         // Safety actions
         Route::resource('safety', SafetyController::class);
         Route::post('safety/renew',   [SafetyController::class, 'updateSafetyCertification'])->name('safety.renew');

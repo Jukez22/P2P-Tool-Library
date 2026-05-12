@@ -15,7 +15,7 @@ class MaintenanceController extends Controller
         
         // 1. Priority Queue
         $queue = \App\Models\MaintenanceLog::with('tool')
-            ->whereIn('status', ['scheduled', 'in-progress', 'pending'])
+            ->whereIn('status', ['scheduled', 'in-progress'])
             ->get();
 
         // 2. Usage Triggers
@@ -63,6 +63,38 @@ class MaintenanceController extends Controller
         ));
     }
 
+    public function startWork(Request $request)
+    {
+        $request->validate([
+            'log_id' => 'required|exists:maintenance_logs,id',
+        ]);
+
+        $log = \App\Models\MaintenanceLog::findOrFail($request->log_id);
+        $log->status = 'in-progress';
+        $log->technician_id = auth()->id();
+        $log->started_at = now();
+        $log->save();
+
+        return redirect()->route('maintenance.dashboard')
+            ->with('success', 'Started work on: ' . ($log->tool->title ?? 'Tool') . '.');
+    }
+
+    public function completeWork(Request $request)
+    {
+        $request->validate([
+            'log_id' => 'required|exists:maintenance_logs,id',
+            'is_successful' => 'required|boolean',
+        ]);
+
+        $log = \App\Models\MaintenanceLog::findOrFail($request->log_id);
+        $log->status = 'done';
+        $log->completed_at = now();
+        $log->is_successful = $request->is_successful;
+        $log->save();
+
+        return redirect()->route('maintenance.dashboard')
+            ->with('success', 'Completed work on: ' . ($log->tool->title ?? 'Tool') . '.');
+    }
 
     public function store(Request $request)
     {
