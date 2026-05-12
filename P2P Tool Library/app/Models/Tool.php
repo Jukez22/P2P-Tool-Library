@@ -15,16 +15,23 @@ class Tool extends Model
         'location_lng',
         'location_lat',
         'category_id',
+<<<<<<< HEAD
+        'owner_id',
+        'deposit_price',
+        'compatibility_tags',
+=======
         'usage_count',
         'maintenance_interval_uses',
         'needs_inspection',
         'safety_cert_expiry_date',
         'warranty_expiry_date',
         'is_unfit',
+>>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'deposit_price' => 'decimal:2',
         'is_boosted' => 'boolean',
         'location_lng' => 'decimal:7',
         'location_lat' => 'decimal:7',

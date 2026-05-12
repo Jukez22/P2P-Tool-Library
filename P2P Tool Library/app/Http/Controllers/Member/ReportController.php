@@ -16,6 +16,13 @@ class ReportController extends Controller
         return response()->json($reports);
     }
 
+    public function create(Request $request)
+    {
+        $reservation_id = $request->reservation_id;
+        $tool_id = $request->tool_id;
+        return view('member.reports.create', compact('reservation_id', 'tool_id'));
+    }
+
     // Submit a new report
     public function store(Request $request)
     {
@@ -27,17 +34,17 @@ class ReportController extends Controller
             'reservation_id'   => 'nullable|integer',
         ]);
 
-        $report = Report::create([
-            'reporter_id'      => Auth::id(), // Securely from logged-in user
+        Report::create([
+            'reporter_id'      => auth()->id(),
             'reported_user_id' => $request->reported_user_id,
             'reported_tool_id' => $request->reported_tool_id,
             'reservation_id'   => $request->reservation_id,
             'reason'           => $request->reason,
             'description'      => $request->description,
-            'status'           => 'pending', // Default status
+            'status'           => 'pending',
         ]);
 
-        return response()->json($report, 201);
+        return redirect()->route('member.dashboard')->with('success', 'Damage report submitted. Our team will review it soon.');
     }
 
     // View a single report (only if it belongs to the logged-in user)
