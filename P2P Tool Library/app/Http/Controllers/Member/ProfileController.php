@@ -39,14 +39,14 @@ class ProfileController extends Controller
             'is_verified' => $request->national_id ? 1 : 0,
         ]);
 
-<<<<<<< HEAD
-        return back()->with('message', 'Profile and Verification updated successfully');
-=======
-        return response()->json([
-            'message' => 'Profile updated successfully',
-            'user'    => $user,
-        ]);
->>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'user'    => $user,
+            ]);
+        }
+
+        return back()->with('success', 'Profile and Verification updated successfully');
     }
 
     // Change the user's password securely

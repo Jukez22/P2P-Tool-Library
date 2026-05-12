@@ -136,7 +136,7 @@
 
           <div class="d-flex gap-2">
             <button type="button" class="btn btn-outline-secondary w-50" onclick="go(1)">Back</button>
-            <button type="submit" class="btn btn-primary w-50 fw-bold" onclick="go(4)">Complete Registration</button>
+            <button type="button" class="btn btn-primary w-50 fw-bold" onclick="submitRegistration()">Complete Registration</button>
           </div>
         </div>
 
@@ -233,11 +233,28 @@
     cur = n;
   }
 
-  // Handle form submission to show Step 4 "Success" state
-  document.getElementById('registerForm').addEventListener('submit', function(e) {
-    // Show step 4 immediately to give feedback while the server processes
+  // Combines full name, then submits the form normally to Laravel
+  function submitRegistration() {
+    // Build full name from the two visible fields
+    const first = document.getElementById('first_name').value.trim();
+    const last  = document.getElementById('last_name').value.trim();
+    if (!first || !last) {
+        document.getElementById('first_name').classList.toggle('is-invalid', !first);
+        document.getElementById('last_name').classList.toggle('is-invalid', !last);
+        return;
+    }
+    document.getElementById('full_name').value = first + ' ' + last;
+
+    const terms = document.getElementById('terms');
+    if (!terms || !terms.checked) {
+        alert('Please agree to the Terms and Guidelines to continue.');
+        return;
+    }
+
+    // Show the success animation, then let the form submit
     go(4);
-  });
+    document.getElementById('registerForm').submit();
+  }
 
 
 </script>

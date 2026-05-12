@@ -48,9 +48,9 @@
           <div class="d-flex gap-3">
             @foreach($tool->documents as $doc)
               @if($doc->type == 'manual')
-                <a href="{{ $doc->file_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">📄 View Manual</a>
+                <a href="{{ $doc->file_url }}" target="_blank" class="btn btn-sm btn-outline-secondary"> View Manual</a>
               @elseif($doc->type == 'video')
-                <a href="{{ $doc->file_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">🎥 Safety Video</a>
+                <a href="{{ $doc->file_url }}" target="_blank" class="btn btn-sm btn-outline-secondary"> Safety Video</a>
               @endif
             @endforeach
           </div>
@@ -78,9 +78,9 @@
             
             resultDiv.style.display = 'block';
             if(tags.includes(search)) {
-              resultDiv.innerHTML = '<span class="text-success">✅ Compatible! This part matches the tool specifications.</span>';
+              resultDiv.innerHTML = '<span class="text-success"> Compatible! This part matches the tool specifications.</span>';
             } else {
-              resultDiv.innerHTML = '<span class="text-warning">⚠️ Caution: Not found in compatibility list. Check manual.</span>';
+              resultDiv.innerHTML = '<span class="text-warning"> Caution: Not found in compatibility list. Check manual.</span>';
             }
           }
         </script>
@@ -141,6 +141,3 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-=======
-<!-- Show View -->
->>>>>>> 8d0d19da599f4cc24cf668f06531e8ed97dc3973

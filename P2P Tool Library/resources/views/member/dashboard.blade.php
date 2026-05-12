@@ -57,6 +57,7 @@
       <a href="{{ route('member.tools.index') }}" class="btn d-block text-decoration-none">🔍 Browse Tools</a>
       <button class="btn" onclick="show('reservations',this)">📅 My Reservations</button>
       <button class="btn" onclick="show('messages',this)">💬 Messages</button>
+      <button class="btn" onclick="show('reports',this)">🚩 Disputes & Reports</button>
 
       <div class="section-head">My Tools</div>
       <button class="btn" onclick="show('mytools',this)">🔧 My Listed Tools</button>
@@ -68,6 +69,7 @@
       <button class="btn" onclick="show('deposit',this)">💰 Deposit / Escrow</button>
       <button class="btn" onclick="show('referral',this)">🎁 Referral Rewards</button>
       <button class="btn" onclick="show('membership',this)">🏅 Membership</button>
+      <button class="btn" onclick="show('profile',this)">⚙️ Profile Settings</button>
     </div>
 
     <div class="col-md-10 p-4">
@@ -210,6 +212,7 @@
                       <button type="submit" class="btn btn-link btn-sm text-danger text-decoration-none p-0 ms-2">Cancel</button>
                     </form>
                     <a href="{{ route('member.messages.show', $res->tool->owner_id) }}" class="btn btn-outline-secondary btn-sm ms-2" title="Message Lender">💬</a>
+                    <button class="btn btn-outline-danger btn-sm ms-2" title="Report Issue" onclick="setReportModal({{ $res->id }}, {{ $res->tool_id }}, {{ $res->tool->owner_id }})">🚩</button>
                   </td>
                 </tr>
                 @empty
@@ -365,8 +368,21 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label small fw-bold">Upload Photos (Optional)</label>
-                <input type="file" class="form-control form-control-sm" multiple/>
+                <label class="form-label small fw-bold text-info">Compatibility Tags (Optional)</label>
+                <input type="text" name="compatibility_tags" class="form-control" placeholder="e.g. SDS Plus, M18 Battery, 10-inch Blade"/>
+                <div class="form-text small">List parts or standards this tool is compatible with, separated by commas.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-primary">Documentation (Optional)</label>
+                <div class="input-group mb-2">
+                  <span class="input-group-text small">📄 Manual URL</span>
+                  <input type="url" name="manual_url" class="form-control" placeholder="Link to PDF manual"/>
+                </div>
+                <div class="input-group">
+                  <span class="input-group-text small">🎥 Video URL</span>
+                  <input type="url" name="video_url" class="form-control" placeholder="Link to safety video"/>
+                </div>
               </div>
 
               <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">List Tool Now</button>
@@ -509,7 +525,136 @@
         </div>
       </div>
 
+      <div class="panel" id="panel-profile">
+        <div class="fw-bold fs-5 mb-1">Profile Settings</div>
+        <div class="text-secondary small mb-3">Manage your personal information and verification</div>
+        <div class="card p-4">
+          <form action="{{ route('member.profile.update', $user->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="row g-3">
+              <div class="col-md-6"><label class="small fw-bold">Full Name</label><input type="text" name="name" class="form-control" value="{{ $user->name }}" required></div>
+              <div class="col-md-6"><label class="small fw-bold">Phone Number</label><input type="text" name="phone" class="form-control" value="{{ $user->phone }}" required></div>
+              <div class="col-12"><label class="small fw-bold">Address</label><input type="text" name="address" class="form-control" value="{{ $user->address }}"></div>
+              <div class="col-md-6"><label class="small fw-bold">National ID (for verification)</label><input type="text" name="national_id" class="form-control" value="{{ $user->national_id }}"></div>
+              <div class="col-md-6 d-flex align-items-end">
+                @if($user->is_verified)
+                  <span class="badge bg-success p-2 px-3">✓ Verified Account</span>
+                @else
+                  <span class="badge bg-warning text-dark p-2 px-3">! Verification Pending</span>
+                @endif
+              </div>
+              <div class="col-12 mt-4"><button type="submit" class="btn btn-primary px-5">Save Changes</button></div>
+            </div>
+          </form>
+
+          <hr class="my-4"/>
+
+          <h5 class="fw-bold mb-3 fs-6">Change Password</h5>
+          <form action="{{ route('member.profile.changePassword') }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-bold small">Current Password</label>
+                <input type="password" name="current_password" class="form-control" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small">New Password</label>
+                <input type="password" name="new_password" class="form-control" required/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small">Confirm New Password</label>
+                <input type="password" name="new_password_confirmation" class="form-control" required/>
+              </div>
+              <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-outline-primary px-4">Update Password</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-reports">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <div class="fw-bold fs-5 mb-1">Disputes & Reports</div>
+            <div class="text-secondary small">Track your damage reports and system disputes</div>
+          </div>
+          <button class="btn btn-danger btn-sm px-3 fw-bold" onclick="setReportModal(null, null, null)">File New Dispute</button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="card-body p-0">
+            <table class="table table-hover mb-0 small text-center align-middle">
+              <thead class="table-light"><tr><th>Date</th><th>Reason</th><th>Description</th><th>Status</th></tr></thead>
+              <tbody>
+                @forelse($reports as $report)
+                <tr>
+                  <td>{{ $report->created_at->format('Y-m-d') }}</td>
+                  <td><span class="badge bg-light text-dark border">{{ ucfirst(str_replace('_', ' ', $report->reason)) }}</span></td>
+                  <td class="text-start">{{ Str::limit($report->description, 50) }}</td>
+                  <td>
+                    @if($report->status == 'pending') <span class="badge bg-warning text-dark">Pending Review</span>
+                    @elseif($report->status == 'resolved') <span class="badge bg-success">Resolved</span>
+                    @else <span class="badge bg-secondary">Dismissed</span> @endif
+                  </td>
+                </tr>
+                @empty
+                <tr><td colspan="4" class="text-center text-muted p-4">No reports submitted yet.</td></tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div></div></div>
+
+<div class="modal fade" id="reportModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content shadow">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Report Issue / Damage</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ route('member.reports.store') }}" method="POST">
+        @csrf
+        <input type="hidden" name="reservation_id" id="rep_res_id">
+        <input type="hidden" name="reported_tool_id" id="rep_tool_id">
+        <input type="hidden" name="reported_user_id" id="rep_user_id">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="small fw-bold">Reason</label>
+            <select name="reason" class="form-select" required>
+              <option value="damaged_tool">Damaged Tool</option>
+              <option value="late_return">Late Return</option>
+              <option value="no_show">No Show</option>
+              <option value="fraud">Fraud / Scam</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="small fw-bold">Description</label>
+            <textarea name="description" class="form-control" rows="4" placeholder="Please describe the issue in detail..." required minlength="10"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-danger w-100 fw-bold">Submit Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setReportModal(resId, toolId, userId) {
+    document.getElementById('rep_res_id').value = resId;
+    document.getElementById('rep_tool_id').value = toolId;
+    document.getElementById('rep_user_id').value = userId;
+    new bootstrap.Modal(document.getElementById('reportModal')).show();
+  }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>

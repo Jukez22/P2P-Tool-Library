@@ -19,8 +19,11 @@ class DashboardController extends Controller
             'messagesReceived.sender', 
             'referrals.referredUser', 
             'trustScoreLogs', 
-            'membershipTier'
+            'membershipTier',
+            'reports'
         ]);
+
+        $reports = \App\Models\Report::where('reporter_id', $user->id)->latest()->get();
 
         // Calculate earnings this month (based on reservations for their tools)
         $earningsThisMonth = \App\Models\Reservation::whereHas('tool', function($q) use ($user) {
@@ -87,6 +90,6 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
-        return view('member.dashboard', compact('user', 'categories', 'contacts', 'activeMessages', 'selectedContact', 'recentMessages', 'earningsThisMonth', 'totalTransactions'));
+        return view('member.dashboard', compact('user', 'categories', 'contacts', 'activeMessages', 'selectedContact', 'recentMessages', 'earningsThisMonth', 'totalTransactions', 'reports'));
     }
 }

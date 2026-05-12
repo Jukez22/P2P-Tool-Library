@@ -20,10 +20,14 @@ class SafetyController extends Controller
         $tool->safety_cert_expiry_date = $request->safety_cert_expiry_date;
         $tool->save();
 
-        return response()->json([
-            'message' => 'Safety certification updated successfully',
-            'tool' => $tool
-        ]);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Safety certification updated successfully',
+                'tool' => $tool
+            ]);
+        }
+
+        return redirect()->route('maintenance.dashboard')->with('success', 'Safety certification updated successfully');
     }
 
 
@@ -44,9 +48,27 @@ class SafetyController extends Controller
             ->where('status', 'pending')
             ->update(['status' => 'cancelled']);
 
-        return response()->json([
-            'message' => 'Tool marked as unfit. Future reservations cancelled.',
-            'tool' => $tool
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Tool marked as unfit. Future reservations cancelled.',
+                'tool' => $tool
+            ]);
+        }
+
+        return redirect()->route('maintenance.dashboard')->with('success', 'Tool locked out successfully.');
+    }
+
+    public function markFit(Request $request)
+    {
+        $request->validate([
+            'tool_id' => 'required|exists:tools,id',
         ]);
+
+        $tool = Tool::findOrFail($request->tool_id);
+        $tool->is_unfit = false;
+        $tool->save();
+
+        return redirect()->route('maintenance.dashboard')
+            ->with('success', 'Tool released and is now available in the marketplace.');
     }
 }

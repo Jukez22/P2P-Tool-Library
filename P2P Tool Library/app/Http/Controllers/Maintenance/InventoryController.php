@@ -52,4 +52,19 @@ class InventoryController extends Controller
             'log' => $log
         ]);
     }
+
+    public function updateStock(Request $request)
+    {
+        $request->validate([
+            'consumable_id'  => 'required|exists:consumables,id',
+            'quantity_used'  => 'required|integer|min:1',
+        ]);
+
+        $consumable = Consumable::findOrFail($request->consumable_id);
+        $consumable->stock_level = max(0, ($consumable->stock_level ?? 0) - $request->quantity_used);
+        $consumable->save();
+
+        return redirect()->route('maintenance.dashboard')
+            ->with('success', 'Consumable stock updated successfully.');
+    }
 }

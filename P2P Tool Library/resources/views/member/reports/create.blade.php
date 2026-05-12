@@ -30,18 +30,29 @@
           @csrf
           <input type="hidden" name="reservation_id" value="{{ $reservation_id }}"/>
           <input type="hidden" name="reported_tool_id" value="{{ $tool_id }}"/>
-          <input type="hidden" name="reason" value="damaged_tool"/>
+          <input type="hidden" name="reported_user_id" value="{{ $reported_user_id }}"/>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small">What happened?</label>
-            <textarea name="description" class="form-control" rows="5" placeholder="Describe the damage in detail (e.g. blade is cracked, motor won't start)..." required></textarea>
+            <label class="form-label fw-bold small">Reason for Report</label>
+            <select name="reason" class="form-select" required>
+              <option value="damaged_tool">Damaged Tool</option>
+              <option value="late_return">Late Return</option>
+              <option value="no_show">No Show</option>
+              <option value="fraud">Fraud / Scam</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Description / Details</label>
+            <textarea name="description" class="form-control" rows="5" placeholder="Please provide specific details about what happened..." required minlength="10"></textarea>
           </div>
 
           <div class="alert alert-warning small">
             ⚠️ Note: Once submitted, the Librarian will review the case and may contact both parties.
           </div>
 
-          <button type="submit" class="btn btn-danger w-100 py-2 fw-bold">Submit Damage Report</button>
+          <button type="submit" class="btn btn-danger w-100 py-2 fw-bold">Submit Report</button>
         </form>
       </div>
     </div>

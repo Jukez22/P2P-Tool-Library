@@ -33,4 +33,21 @@ class KnowledgeBaseController extends Controller
             'article' => $article
         ]);
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title'   => 'required|string|max:255',
+            'content' => 'required|string|min:10',
+        ]);
+
+        DiagnosticArticle::create([
+            'title'     => $request->title,
+            'content'   => $request->content,
+            'author_id' => auth()->id(),
+        ]);
+
+        return redirect()->route('maintenance.dashboard')
+            ->with('success', 'Article submitted to the knowledge base!');
+    }
 }

@@ -94,4 +94,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(TrustScoreLog::class, 'user_id');
     }
+
+    /**
+     * Get the reports submitted by the user.
+     */
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
 }

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Member\ToolController;
+use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\ReservationController;
 use App\Http\Controllers\Member\ProfileController;
 use App\Http\Controllers\Member\MessageController;
@@ -48,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     // MEMBER MODULE (Lenders & Borrowers)
     // ==========================================
     Route::prefix('member')->name('member.')->group(function () {
+        Route::get('dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
         Route::resource('tools', ToolController::class);
         Route::resource('reservations', ReservationController::class);
         Route::resource('profile', ProfileController::class);
@@ -76,11 +78,29 @@ Route::middleware(['auth'])->group(function () {
     // ==========================================
     // Requires both 'auth' and 'role:technician' authorization middleware
     Route::prefix('maintenance')->name('maintenance.')->middleware('role:technician')->group(function () {
-        Route::resource('queue', MaintenanceController::class);
+        Route::get('dashboard', [MaintenanceController::class, 'index'])->name('dashboard');
+
+        // Usage trigger threshold
+        Route::post('trigger/store', [MaintenanceController::class, 'store'])->name('trigger.store');
+
+        // Safety actions
         Route::resource('safety', SafetyController::class);
+        Route::post('safety/renew',   [SafetyController::class, 'updateSafetyCertification'])->name('safety.renew');
+        Route::post('safety/lockout', [SafetyController::class, 'markUnfit'])->name('safety.lockout');
+        Route::post('safety/release', [SafetyController::class, 'markFit'])->name('safety.release');
+
+        // Repairs & Parts
         Route::resource('repairs', RepairController::class);
+        Route::post('repairs/spare-part', [RepairController::class, 'orderSparePart'])->name('repairs.spare-part');
+        Route::post('repairs/external',   [RepairController::class, 'dispatchExternalRepair'])->name('repairs.external');
+
+        // Inventory & Consumables
         Route::resource('inventory', MaintenanceInventoryController::class);
+        Route::post('inventory/stock', [MaintenanceInventoryController::class, 'updateStock'])->name('inventory.stock');
+
+        // Knowledge Base
         Route::resource('wiki', KnowledgeBaseController::class);
+        Route::post('wiki/store', [KnowledgeBaseController::class, 'store'])->name('wiki.store');
     });
 
 });

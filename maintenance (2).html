@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Maintenance Dashboard – 3EDTAK</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body { background-color: #f8f9fa; color: #212529; }
+    .sidebar { min-height: 100vh; background-color: #ffffff; border-end: 1px solid #dee2e6; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+    .sidebar .btn { font-size:0.82rem; text-align:left; border-radius:0; border: none; color: #495057; }
+    .sidebar .btn:hover { background-color: #e9ecef; }
+    .sidebar .btn.active-link { background-color: #e7f1ff; color: #0d6efd; fw-bold; border-right: 3px solid #0d6efd; }
+    .card { border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #dee2e6 !important; background-color: #ffffff !important; color: #212529 !important; }
+    .table { color: #212529 !important; }
+    .table-light-head thead { background-color: #f8f9fa; }
+    .text-secondary { color: #6c757d !important; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand fw-bold text-primary" href="index.html">3EDTAK - Maintenance Dashboard</a>
+    <div class="d-flex align-items-center gap-2">
+      <small class="text-muted">Omar Yehia – Technician</small>
+      <a href="login.html" class="btn btn-outline-secondary btn-sm">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <div class="col-md-2 border-end sidebar p-0">
+      <div class="p-3 border-bottom bg-light">
+        <div class="fw-bold small">Omar Yehia</div>
+        <div class="text-muted" style="font-size:0.75rem;">Technician Dashboard</div>
+      </div>
+      <div class="p-1">
+        <div class="text-muted px-2 mt-2 mb-1" style="font-size:0.65rem; text-transform:uppercase; font-weight:bold;">Inspections</div>
+        <button class="btn w-100 active-link" onclick="show('queue',this)">📋 Maintenance Queue</button>
+        <button class="btn w-100" onclick="show('trigger',this)">⚡ Usage Triggers</button>
+        <button class="btn w-100" onclick="show('safety',this)">🛡️ Safety Certs</button>
+        <button class="btn w-100" onclick="show('lockout',this)">🔒 Tool Lockout</button>
+        <button class="btn w-100" onclick="show('battery',this)">🔋 Battery Health</button>
+
+        <div class="text-muted px-2 mt-3 mb-1" style="font-size:0.65rem; text-transform:uppercase; font-weight:bold;">Repairs & Workflow</div>
+        <button class="btn w-100" onclick="show('estimator',this)">💰 Cost Estimator</button>
+        <button class="btn w-100" onclick="show('external',this)">🏭 External Repair</button>
+        <button class="btn w-100" onclick="show('parts',this)">🔩 Replacement Parts</button>
+        <button class="btn w-100" onclick="show('history',this)">📜 Service History</button>
+
+        <div class="text-muted px-2 mt-3 mb-1" style="font-size:0.65rem; text-transform:uppercase; font-weight:bold;">Inventory & End-of-Life</div>
+        <button class="btn w-100" onclick="show('consumables',this)">📦 Consumables</button>
+        <button class="btn w-100" onclick="show('warranty',this)">📅 Warranty Alerts</button>
+        <button class="btn w-100" onclick="show('disposal',this)">♻️ Disposal Workflow</button>
+
+        <div class="text-muted px-2 mt-3 mb-1" style="font-size:0.65rem; text-transform:uppercase; font-weight:bold;">Admin</div>
+        <button class="btn w-100" onclick="show('knowledgebase',this)">📖 Knowledge Base</button>
+        <button class="btn w-100" onclick="show('metrics',this)">📊 Tech Metrics</button>
+      </div>
+    </div>
+
+    <div class="col-md-10 p-4">
+
+      <div class="panel active" id="panel-queue">
+        <div class="fw-bold fs-5 mb-1">Maintenance Priority Queue</div>
+        <div class="text-secondary small mb-3">Tools prioritized by demand and safety risk</div>
+        <div class="card p-0">
+          <table class="table table-hover small mb-0">
+            <thead class="table-light"><tr><th>#</th><th>Tool</th><th>Issue</th><th>Priority Score</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>🪚 Tile Saw</td><td>PAT cert expired (High demand)</td><td><span class="badge bg-danger">95/100</span></td><td><button class="btn btn-primary btn-sm">Start Inspection</button></td></tr>
+              <tr><td>2</td><td>🔩 Milwaukee Drill</td><td>100-use routine check due</td><td><span class="badge bg-warning text-dark">88/100</span></td><td><button class="btn btn-primary btn-sm">Start Inspection</button></td></tr>
+              <tr><td>3</td><td>🖨️ 3D Printer</td><td>Erratic extrusion reported</td><td><span class="badge bg-info text-dark">72/100</span></td><td><button class="btn btn-primary btn-sm">Start Inspection</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-trigger">
+        <div class="fw-bold fs-5 mb-1">Usage-Based Maintenance Triggers</div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card p-3">
+              <div class="mb-3"><label class="form-label small fw-bold">Set New Trigger</label>
+                <select class="form-select mb-2"><option>Power Tools</option></select>
+                <input type="number" class="form-control" placeholder="Threshold (e.g. 100 uses)"/>
+              </div>
+              <button class="btn btn-primary btn-sm w-100">Add Rule</button>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card p-0">
+              <table class="table small mb-0">
+                <thead><tr><th>Tool</th><th>Uses Since Last Check</th><th>Threshold</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>🔩 Milwaukee Drill</td><td>102</td><td>100</td><td><span class="badge bg-danger">Flagged</span></td></tr>
+                  <tr><td>🪚 Tile Saw</td><td>45</td><td>50</td><td><span class="badge bg-success">OK</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-safety">
+        <div class="fw-bold fs-5 mb-1">Safety Certification Logger</div>
+        <div class="card p-0">
+          <table class="table small mb-0">
+            <thead><tr><th>Tool</th><th>Cert Type</th><th>Last Test</th><th>Expiry Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>🔩 Milwaukee Drill</td><td>PAT Test</td><td>May 2025</td><td>May 2026</td><td><span class="badge bg-success">Valid</span></td><td><button class="btn btn-outline-secondary btn-sm">Renew</button></td></tr>
+              <tr><td>🪚 Tile Saw</td><td>PAT Test</td><td>Apr 2024</td><td>Apr 2025</td><td><span class="badge bg-danger">Expired</span></td><td><button class="btn btn-primary btn-sm">Log New Test</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-lockout">
+        <div class="fw-bold fs-5 mb-1">Unfit for Use – Lockout System</div>
+        <div class="alert alert-warning small">Locked tools are hidden from the borrower marketplace.</div>
+        <div class="card p-3 mb-3">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4"><label class="form-label small">Tool to Lock</label><input type="text" class="form-control" placeholder="Search tool..."/></div>
+            <div class="col-md-4"><label class="form-label small">Reason</label><input type="text" class="form-control" placeholder="e.g. Exposed wiring"/></div>
+            <div class="col-md-4"><button class="btn btn-danger w-100">Activate Lockout</button></div>
+          </div>
+        </div>
+        <div class="card p-0">
+          <table class="table small mb-0">
+            <thead><tr><th>Tool</th><th>Locked On</th><th>Technician</th><th>Reason</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>⚠️ Broken Drill</td><td>May 5</td><td>Omar Y.</td><td>Mechanical failure</td><td><button class="btn btn-success btn-sm">Release</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-battery">
+        <div class="fw-bold fs-5 mb-1">Battery Health Tracking</div>
+        <div class="card p-0">
+          <table class="table small mb-0">
+            <thead><tr><th>Tool</th><th>Battery Serial</th><th>Cycle Count</th><th>Est. Capacity</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>🔋 Milwaukee M18</td><td>SN-9921</td><td>420</td><td><div class="progress" style="height:10px;"><div class="progress-bar bg-warning" style="width:65%"></div></div></td><td><span class="badge bg-warning text-dark">Degraded</span></td></tr>
+              <tr><td>🔋 DeWalt 20V</td><td>SN-1022</td><td>110</td><td><div class="progress" style="height:10px;"><div class="progress-bar bg-success" style="width:92%"></div></div></td><td><span class="badge bg-success">Healthy</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-estimator">
+        <div class="fw-bold fs-5 mb-1">Repair Cost Estimator</div>
+        <div class="text-secondary small mb-3">Database-driven tool to estimate repair costs</div>
+        <div class="row g-3">
+          <div class="col-md-5">
+            <div class="card p-3">
+              <div class="mb-3"><label class="form-label">Tool Category</label><select class="form-select"><option>Power Tools</option><option>3D Printing</option></select></div>
+              <div class="mb-3"><label class="form-label">Issue Type</label>
+                <select class="form-select" onchange="showEstimate()">
+                  <option value="">-- Select Issue --</option>
+                  <option value="motor">Motor Replacement</option>
+                  <option value="chuck">Chuck Replacement</option>
+                  <option value="battery">Battery Replacement</option>
+                  <option value="blade">Blade Replacement</option>
+                  <option value="nozzle">Nozzle Clog (3D Printer)</option>
+                </select>
+              </div>
+              <button class="btn btn-primary w-100" onclick="showEstimate()">Calculate Estimate</button>
+              <div id="estimateBox" class="card mt-3 p-3 border-primary" style="display:none; background-color:#f0f7ff;">
+                <div class="small text-secondary">Estimated Total</div>
+                <div class="fs-4 fw-bold text-primary" id="estimateVal">---</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-7">
+            <div class="card p-0">
+              <table class="table small mb-0">
+                <thead><tr><th>Issue</th><th>Parts</th><th>Labor</th><th>Total</th></tr></thead>
+                <tbody>
+                  <tr><td>Motor Replacement</td><td>250 EGP</td><td>150 EGP</td><td class="text-primary fw-bold">400 EGP</td></tr>
+                  <tr><td>Nozzle Clog Fix</td><td>20 EGP</td><td>60 EGP</td><td class="text-primary fw-bold">80 EGP</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-external">
+        <div class="fw-bold fs-5 mb-1">External Repair Integration</div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card p-3">
+              <div class="mb-2"><label class="form-label small">Tool</label><input type="text" class="form-control" placeholder="Search..."/></div>
+              <div class="mb-2"><label class="form-label small">Shop</label><select class="form-select"><option>TechFix Maadi</option></select></div>
+              <div class="mb-2"><label class="form-label small">Est. Return</label><input type="date" class="form-control"/></div>
+              <button class="btn btn-primary w-100 mt-2">Send for Repair</button>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card p-0">
+              <table class="table small mb-0">
+                <thead><tr><th>Tool</th><th>Shop</th><th>Sent</th><th>Est. Return</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>📷 FLIR Camera</td><td>TechFix Maadi</td><td>Apr 30</td><td>May 7</td><td><span class="badge bg-warning text-dark">In Progress</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-parts">
+        <div class="fw-bold fs-5 mb-1">Replacement Part Procurement</div>
+        <div class="card p-0">
+          <table class="table small mb-0">
+            <thead><tr><th>Part</th><th>Tool</th><th>Supplier</th><th>Cost</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>M18 Battery</td><td>Milwaukee Drill</td><td>Milwaukee EG</td><td>300 EGP</td><td><span class="badge bg-warning text-dark">Shipped</span></td></tr>
+              <tr><td>Tile Saw Blade</td><td>Tile Saw</td><td>ProTools</td><td>240 EGP</td><td><span class="badge bg-success">Received</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-history">
+        <div class="fw-bold fs-5 mb-1">Maintenance History Portfolio</div>
+        <div class="card p-0">
+          <div class="card-header bg-light small fw-bold">🔩 Milwaukee Power Drill – History</div>
+          <table class="table small mb-0">
+            <thead><tr><th>Date</th><th>Type</th><th>Technician</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>May 3, 2026</td><td>Routine</td><td>Khaled S.</td><td><span class="badge bg-warning text-dark">Flagged</span></td></tr>
+              <tr><td>Mar 10, 2026</td><td>Safety</td><td>Khaled S.</td><td><span class="badge bg-success">Passed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-consumables">
+        <div class="fw-bold fs-5 mb-1">Consumables Inventory Tracker</div>
+        <div class="card p-0">
+          <table class="table small mb-0">
+            <thead><tr><th>Item</th><th>Current Stock</th><th>Min Level</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>PLA Filament</td><td>1 roll</td><td>2 rolls</td><td><span class="badge bg-danger">Low Stock</span></td><td><button class="btn btn-primary btn-sm">Notify Lender</button></td></tr>
+              <tr><td>Drill Bits Set</td><td>3 sets</td><td>1 set</td><td><span class="badge bg-success">OK</span></td><td><button class="btn btn-outline-secondary btn-sm">Update</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-warranty">
+        <div class="fw-bold fs-5 mb-1">Warranty Expiry Alerts</div>
+        <div class="card p-0">
+          <table class="table small mb-0">
+            <thead><tr><th>Tool</th><th>Lender</th><th>Expires</th><th>Days Left</th></tr></thead>
+            <tbody>
+              <tr><td>🔩 Milwaukee Drill</td><td>Sara Y.</td><td>May 20, 2026</td><td><span class="badge bg-danger">10 days</span></td></tr>
+              <tr><td>📷 FLIR Camera</td><td>Hana R.</td><td>Jun 1, 2026</td><td><span class="badge bg-warning text-dark">22 days</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-disposal">
+        <div class="fw-bold fs-5 mb-1">Disposal / Recycle Workflow</div>
+        <div class="card p-0">
+          <table class="table small mb-0">
+            <thead><tr><th>Tool</th><th>Reason</th><th>Method</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Old Cordless Drill</td><td>Beyond Repair</td><td>Electronics Recycle</td><td><span class="badge bg-success">Completed</span></td></tr>
+              <tr><td>Old Sewing Machine</td><td>End of Lifespan</td><td>Donate</td><td><span class="badge bg-warning text-dark">In Progress</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-knowledgebase">
+        <div class="fw-bold fs-5 mb-1">Technical Knowledge Base</div>
+        <div class="row g-3">
+          <div class="col-md-8">
+            <div class="card p-0">
+              <table class="table table-hover small mb-0">
+                <thead><tr><th>Article Title</th><th>Category</th><th>Views</th></tr></thead>
+                <tbody>
+                  <tr><td>How to fix a 3D printer nozzle clog</td><td>3D Printing</td><td>42</td></tr>
+                  <tr><td>PAT testing guide for electric tools</td><td>General</td><td>78</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3">
+              <div class="fw-bold small mb-2">Contribute</div>
+              <button class="btn btn-outline-primary btn-sm w-100">Add New Tip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-metrics">
+        <div class="fw-bold fs-5 mb-1">Technician Performance Metrics</div>
+        <div class="row g-3">
+          <div class="col-md-4"><div class="card p-3 text-center"><div class="fs-4 fw-bold text-primary">12</div><small>Repairs (Month)</small></div></div>
+          <div class="col-md-4"><div class="card p-3 text-center"><div class="fs-4 fw-bold text-success">92%</div><small>Success Rate</small></div></div>
+          <div class="col-md-4"><div class="card p-3 text-center"><div class="fs-4 fw-bold text-info">1.4d</div><small>Avg. Time</small></div></div>
+        </div>
+      </div>
+
+    </div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function show(id, el) {
+    // 3shan nkhby el panels kolaha awl ma ados 3la ay button
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    // 3shan a3ml active lel panel elly ana ados 3leh
+    document.getElementById('panel-' + id).classList.add('active');
+    
+    // 3shan a3ml active lel button elly ana ados 3leh w a5ly el buttons el tanyen yeshilo active
+    document.querySelectorAll('.sidebar .btn').forEach(b => b.classList.remove('active-link'));
+    if(el) el.classList.add('active-link');
+  }
+
+  function showEstimate() {
+    const sel = document.querySelector('#panel-estimator select:nth-of-type(2)').value;
+    const map = { 
+      motor: '400 EGP (250 Parts + 150 Labor)', 
+      chuck: '130 EGP (80 Parts + 50 Labor)', 
+      battery: '330 EGP (300 Parts + 30 Labor)', 
+      blade: '160 EGP (120 Parts + 40 Labor)', 
+      nozzle: '80 EGP (20 Parts + 60 Labor)' 
+    };
+    if (map[sel]) {
+      document.getElementById('estimateVal').textContent = map[sel];
+      document.getElementById('estimateBox').style.display = 'block';
+    } else {
+      document.getElementById('estimateBox').style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html>

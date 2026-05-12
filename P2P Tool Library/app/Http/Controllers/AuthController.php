@@ -48,7 +48,7 @@ class AuthController extends Controller
             'name'               => $data['name'],
             'phone'              => $data['phone'],
             'email'              => $data['email'],
-            'password'           => $data['password'], 
+            'password'           => \Illuminate\Support\Facades\Hash::make($data['password']), 
             'role'               => $data['role'],
             'address'            => $data['address'] ?? null,
             'membership_tier_id' => 1, 
@@ -73,11 +73,10 @@ class AuthController extends Controller
         }
         
         if ($role == 'technician') {
-            // Adjusting to maintenance queue as the default for technicians
-            return redirect()->intended(route('maintenance.queue.index'));
+            return redirect()->intended(route('maintenance.dashboard'));
         }
         
-        return redirect()->intended('welcome');
+        return redirect()->intended('/');
     }
 
     public function logout(Request $request)
