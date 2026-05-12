@@ -20,11 +20,11 @@ class HandoverController extends Controller
         $verification = HandoverVerification::where('qr_code', $request->qr_code)->first();
 
         if (!$verification) {
-            return response()->json(['message' => 'Invalid QR code'], 404);
+            return redirect()->back()->with('error', 'Invalid QR code');
         }
 
         if ($verification->is_verified) {
-            return response()->json(['message' => 'Already verified'], 422);
+            return redirect()->back()->with('error', 'Handover already verified');
         }
 
         $verification->update([
@@ -32,9 +32,35 @@ class HandoverController extends Controller
             'verified_at' => Carbon::now(),
         ]);
 
-        return response()->json([
-            'message' => 'Tool handover verified successfully',
-            'data' => $verification
+        return redirect()->back()->with('success', 'Tool handover verified successfully!');
+    }
+
+    // Generate QR Code for handover verification
+    public function generateQR(Request $request)
+    {
+        $request->validate([
+            'reservation_id' => 'required|string',
+            'transfer_type'  => 'nullable|string',
         ]);
+
+        // Clean any non-numeric chars if entered like RES-123
+        $borrowId = preg_replace('/[^0-9]/', '', $request->reservation_id);
+        
+        $qrCode = 'QR-' . strtoupper(substr(md5(uniqid()), 0, 8));
+
+        $verification = HandoverVerification::updateOrCreate(
+            ['borrow_id' => $borrowId],
+            [
+                'qr_code'     => $qrCode,
+                'is_verified' => false,
+                'verified_at' => null,
+            ]
+        );
+
+        return redirect()->back()->with('qr_generated', [
+            'code'           => $qrCode,
+            'reservation_id' => 'RES-' . $borrowId,
+            'type'           => $request->transfer_type ?? 'Pickup'
+        ])->with('success', 'QR Code generated successfully!');
     }
 }

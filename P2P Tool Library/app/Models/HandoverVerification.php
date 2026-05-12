@@ -22,8 +22,8 @@ class HandoverVerification extends Model
     ];
 
     // Link to the borrow record
-    public function borrow()
+    public function reservation()
     {
-        return $this->belongsTo(Borrow::class);
+        return $this->belongsTo(Reservation::class, 'borrow_id');
     }
 }

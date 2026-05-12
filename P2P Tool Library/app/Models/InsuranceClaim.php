@@ -29,10 +29,9 @@ class InsuranceClaim extends Model
         'completed_at'   => 'datetime',
     ];
 
-    // Associated borrow
-    public function borrow()
+    public function reservation()
     {
-        return $this->belongsTo(Borrow::class, 'borrow_id');
+        return $this->belongsTo(Reservation::class, 'borrow_id');
     }
 
     // The tool

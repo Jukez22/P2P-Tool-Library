@@ -66,4 +66,55 @@ class SuspensionController extends Controller
             'data'    => $suspension,
         ], 201);
     }
+
+    // Unified action for dashboard restriction form submission
+    public function applyRestriction(Request $request)
+    {
+        $request->validate([
+            'member_id'   => 'required|string',
+            'type'        => 'required|string',
+            'reason'      => 'required|string|max:255',
+        ]);
+
+        // Find user by ID or Email or Name
+        $user = User::where('id', $request->member_id)
+                    ->orWhere('email', $request->member_id)
+                    ->orWhere('name', 'like', '%' . $request->member_id . '%')
+                    ->first();
+
+        if (!$user) {
+            return redirect()->back()->with('error', 'Member not found matching given identifier.');
+        }
+
+        $days = null;
+        $type = 'temporary';
+        if (str_contains($request->type, '30')) {
+            $days = 30;
+        } elseif (str_contains($request->type, '60')) {
+            $days = 60;
+        } else {
+            $type = 'permanent_ban';
+        }
+
+        UserSuspension::create([
+            'user_id'         => $user->id,
+            'type'            => $type,
+            'reason'          => $request->reason,
+            'suspended_until' => $days ? now()->addDays($days) : null,
+            'is_active'       => true,
+            'created_by'      => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('success', 'Restriction successfully applied to ' . $user->name);
+    }
+
+    // Lift ban / restriction
+    public function liftBan($id)
+    {
+        $suspension = UserSuspension::find($id);
+        if ($suspension) {
+            $suspension->delete();
+        }
+        return redirect()->back()->with('success', 'Restriction successfully lifted.');
+    }
 }

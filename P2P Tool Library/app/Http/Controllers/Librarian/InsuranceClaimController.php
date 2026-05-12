@@ -157,4 +157,39 @@ class InsuranceClaimController extends Controller
             'data'    => $claim
         ]);
     }
+
+    // Direct dashboard form store
+    public function dashboardStore(Request $request)
+    {
+        $request->validate([
+            'reservation_id' => 'required|string',
+            'claim_type'     => 'required|string',
+            'estimated_loss' => 'required|numeric',
+            'description'    => 'nullable|string',
+        ]);
+
+        $borrowId = preg_replace('/[^0-9]/', '', $request->reservation_id);
+        $res = \App\Models\Reservation::find($borrowId);
+
+        if (!$res) {
+            return redirect()->back()->with('error', 'Reservation ID not found.');
+        }
+
+        $type = 'theft';
+        if (str_contains(strtolower($request->claim_type), 'damage')) {
+            $type = 'total_destruction';
+        }
+
+        InsuranceClaim::create([
+            'borrow_id'            => $res->id,
+            'tool_id'              => $res->tool_id,
+            'claimant_id'          => Auth::id(),
+            'claim_type'           => $type,
+            'claim_status'         => 'pending',
+            'incident_description' => $request->description ?? 'No extra description provided.',
+            'estimated_loss'       => $request->estimated_loss,
+        ]);
+
+        return redirect()->back()->with('success', 'Insurance claim submitted successfully for Reservation #RES-' . $borrowId);
+    }
 }

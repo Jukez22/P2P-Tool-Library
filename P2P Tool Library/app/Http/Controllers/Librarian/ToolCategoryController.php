@@ -16,25 +16,31 @@ class ToolCategoryController extends Controller
     {
         $request->validate([
             'name'        => 'required|string|unique:tool_categories,name',
-            'slug'        => 'required|string|unique:tool_categories,slug',
+            'slug'        => 'nullable|string|unique:tool_categories,slug',
             'parent_id'   => 'nullable|exists:tool_categories,id',
             'description' => 'nullable|string',
             'icon'        => 'nullable|string',
         ]);
 
+        $slug = $request->slug ?: str($request->name)->slug()->toString();
+
         $category = ToolCategory::create([
             'name'        => $request->name,
-            'slug'        => $request->slug,
+            'slug'        => $slug,
             'parent_id'   => $request->parent_id,
             'description' => $request->description,
             'icon'        => $request->icon,
             'is_active'   => true,
         ]);
 
-        return response()->json([
-            'message' => 'Tool category created successfully',
-            'data'    => $category
-        ], 201);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Tool category created successfully',
+                'data'    => $category
+            ], 201);
+        }
+
+        return redirect()->back()->with('success', 'Category "' . $category->name . '" created successfully!');
     }
 
     // Update existing category

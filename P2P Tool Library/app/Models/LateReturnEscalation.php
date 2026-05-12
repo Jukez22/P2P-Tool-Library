@@ -26,10 +26,9 @@ class LateReturnEscalation extends Model
         'resolved_at'       => 'datetime',
     ];
 
-    // The borrow record
-    public function borrow()
+    public function reservation()
     {
-        return $this->belongsTo(Borrow::class, 'borrow_id');
+        return $this->belongsTo(Reservation::class, 'borrow_id');
     }
 
     // Escalation history logs

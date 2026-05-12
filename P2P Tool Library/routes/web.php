@@ -18,6 +18,12 @@ use App\Http\Controllers\Librarian\UserController;
 use App\Http\Controllers\Librarian\CommunicationController;
 use App\Http\Controllers\Librarian\MarketingController;
 use App\Http\Controllers\Librarian\ZoneController;
+use App\Http\Controllers\Librarian\HandoverController;
+use App\Http\Controllers\Librarian\ToolCategoryController;
+use App\Http\Controllers\Librarian\SuspensionController;
+use App\Http\Controllers\Librarian\LateReturnController;
+use App\Http\Controllers\Librarian\InventoryAuditController;
+use App\Http\Controllers\Librarian\InsuranceClaimController;
 
 use App\Http\Controllers\Maintenance\MaintenanceController;
 use App\Http\Controllers\Maintenance\SafetyController;
@@ -64,6 +70,28 @@ Route::middleware(['auth'])->group(function () {
     // Requires both 'auth' and 'role:librarian' authorization middleware
     Route::prefix('librarian')->name('librarian.')->middleware('role:librarian')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Custom Dashboard Action Routes
+        Route::post('handovers/generate-qr', [HandoverController::class, 'generateQR'])->name('handovers.generate');
+        Route::post('handovers/verify-qr', [HandoverController::class, 'verifyHandover'])->name('handovers.verify');
+        
+        Route::post('categories', [ToolCategoryController::class, 'createCategory'])->name('categories.store');
+        
+        Route::post('restrictions/apply', [SuspensionController::class, 'applyRestriction'])->name('restrictions.apply');
+        Route::post('restrictions/{id}/lift', [SuspensionController::class, 'liftBan'])->name('restrictions.lift');
+        
+        Route::post('disputes/{id}/dashboard-resolve', [DisputeController::class, 'dashboardResolve'])->name('disputes.dashboard-resolve');
+        Route::post('disputes/{id}/dashboard-assign', [DisputeController::class, 'dashboardAssign'])->name('disputes.dashboard-assign');
+        
+        Route::post('late-returns/{id}/escalate', [LateReturnController::class, 'dashboardEscalate'])->name('late-returns.escalate');
+        
+        Route::post('insurance-claims/dashboard-store', [InsuranceClaimController::class, 'dashboardStore'])->name('insurance-claims.dashboard-store');
+        Route::post('refunds/process', [DisputeController::class, 'processRefund'])->name('refunds.process');
+        Route::post('audits/dashboard-generate', [InventoryAuditController::class, 'dashboardGenerate'])->name('audits.dashboard-generate');
+        Route::post('tools/{id}/review', [DashboardController::class, 'reviewTool'])->name('tools.review');
+        Route::post('promotions/campaigns', [MarketingController::class, 'storeCampaign'])->name('promotions.store');
+        Route::post('broadcasts/send', [CommunicationController::class, 'sendBroadcast'])->name('broadcasts.send');
+
         Route::resource('inventory', InventoryController::class);
         Route::resource('disputes', DisputeController::class);
         Route::resource('insurance', InsuranceController::class);

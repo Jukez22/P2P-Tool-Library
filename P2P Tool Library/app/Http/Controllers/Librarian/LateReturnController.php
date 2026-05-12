@@ -161,4 +161,26 @@ class LateReturnController extends Controller
             'data'    => $escalation
         ]);
     }
+
+    // Direct web dashboard escalate action
+    public function dashboardEscalate($id)
+    {
+        $escalation = LateReturnEscalation::find($id);
+        if (!$escalation) {
+            return redirect()->back()->with('error', 'Escalation record not found.');
+        }
+
+        $nextLevel = 'final_notice';
+        if ($escalation->escalation_level === 'warning') {
+            $nextLevel = 'penalty_level_1';
+        }
+
+        $escalation->update([
+            'escalation_level' => $nextLevel,
+            'penalty_amount'   => $escalation->penalty_amount + 50, // increase penalty
+            'escalated_at'     => Carbon::now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Escalation for Reservation #RES-' . $escalation->borrow_id . ' bumped to ' . strtoupper(str_replace('_', ' ', $nextLevel)));
+    }
 }
