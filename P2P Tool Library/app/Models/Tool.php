@@ -50,4 +50,19 @@ class Tool extends Model
     {
         return $this->hasMany(MaintenanceLog::class);
     }
+
+    public function inventoryAuditItems()
+    {
+        return $this->hasMany(InventoryAuditItem::class);
+    }
+
+    public function insuranceClaims()
+    {
+        return $this->hasMany(InsuranceClaim::class);
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(ToolCategory::class, 'tool_category_mappings', 'tool_id', 'tool_category_id');
+    }
 }

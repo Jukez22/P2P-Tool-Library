@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
-    // List all people the logged-in user has had conversations with
+    // Conversations list
     public function index()
     {
         $userId = Auth::id();
@@ -27,7 +27,7 @@ class MessageController extends Controller
         return response()->json($contacts);
     }
 
-    // View the chat history with a specific person
+    // View chat history
     public function show($contactId)
     {
         $userId = Auth::id();
@@ -41,7 +41,7 @@ class MessageController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // Mark messages as read when viewing them
+        // Mark as read
         Message::where('sender_id', $contactId)
             ->where('receiver_id', $userId)
             ->update(['is_read' => true]);
@@ -49,7 +49,7 @@ class MessageController extends Controller
         return response()->json($messages);
     }
 
-    // Send a new message
+    // Send message
     public function store(Request $request)
     {
         $request->validate([

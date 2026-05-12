@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    // Run migrations
     public function up(): void
     {
         if (!Schema::hasTable('categories')) {
@@ -205,11 +203,9 @@ return new class extends Migration
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    // Reverse migrations
     public function down(): void
     {
-        // Keep as is for safety, or drop them if you want a clean slate
+        // Keep as is for safety
     }
 };

@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    // List all reports submitted by the logged-in user
+    // List user reports
     public function index()
     {
         $reports = Report::where('reporter_id', Auth::id())->get();
         return response()->json($reports);
     }
 
-    // Submit a new report
+    // New report
     public function store(Request $request)
     {
         $request->validate([
@@ -28,19 +28,19 @@ class ReportController extends Controller
         ]);
 
         $report = Report::create([
-            'reporter_id'      => Auth::id(), // Securely from logged-in user
+            'reporter_id'      => Auth::id(),
             'reported_user_id' => $request->reported_user_id,
             'reported_tool_id' => $request->reported_tool_id,
             'reservation_id'   => $request->reservation_id,
             'reason'           => $request->reason,
             'description'      => $request->description,
-            'status'           => 'pending', // Default status
+            'status'           => 'pending',
         ]);
 
         return response()->json($report, 201);
     }
 
-    // View a single report (only if it belongs to the logged-in user)
+    // View specific report
     public function show($id)
     {
         $report = Report::where('id', $id)
@@ -54,7 +54,7 @@ class ReportController extends Controller
         return response()->json($report);
     }
 
-    // Delete a report (only if it is still pending and belongs to the user)
+    // Delete pending report
     public function destroy($id)
     {
         $report = Report::where('id', $id)
@@ -66,7 +66,7 @@ class ReportController extends Controller
         }
 
         if ($report->status !== 'pending') {
-            return response()->json(['message' => 'Cannot delete a report that has already been reviewed'], 403);
+            return response()->json(['message' => 'Reviewed reports cannot be deleted'], 403);
         }
 
         $report->delete();
