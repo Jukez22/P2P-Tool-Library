@@ -943,7 +943,6 @@
     document.querySelectorAll('.sidebar .btn').forEach(b => { b.classList.remove('text-dark'); b.classList.add('text-secondary'); });
     if (el) { el.classList.remove('text-secondary'); el.classList.add('text-dark'); }
   }
-  // 3shan yeb2a active 3ala awel wa7da
   document.querySelector('.sidebar .btn').classList.add('text-dark');
   document.querySelector('.sidebar .btn').classList.remove('text-secondary');
 </script>

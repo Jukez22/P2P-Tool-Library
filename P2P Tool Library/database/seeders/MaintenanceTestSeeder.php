@@ -13,6 +13,7 @@ use App\Models\BatteryHealthLog;
 use App\Models\ExternalRepair;
 use App\Models\Disposal;
 use App\Models\SparePartOrder;
+use App\Models\MaintenanceLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,7 +21,6 @@ class MaintenanceTestSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Ensure we have an owner User
         $user = User::firstOrCreate(
             ['email' => 'maintenance.tester@example.com'],
             [
@@ -34,29 +34,23 @@ class MaintenanceTestSeeder extends Seeder
             ]
         );
 
-        // 2. Ensure we have a Category
         $category = Category::firstOrCreate(
             ['name' => 'Power Tools'],
             ['description' => 'Various power tools']
         );
 
-        // 3. Seed Consumables
         Consumable::firstOrCreate(['name' => 'Drill Bits Set'], ['stock_level' => 3, 'reorder_threshold' => 10]);
         Consumable::firstOrCreate(['name' => 'Lubricant Oil'], ['stock_level' => 15, 'reorder_threshold' => 5]);
         Consumable::firstOrCreate(['name' => 'Sanding Paper'], ['stock_level' => 0, 'reorder_threshold' => 20]);
 
-        // 4. Seed Repair Cost Estimates
         RepairCostEstimate::firstOrCreate(['issue_name' => 'Motor Replacement'], ['estimated_cost' => 120.00, 'category_id' => $category->id]);
         RepairCostEstimate::firstOrCreate(['issue_name' => 'Power Cord Repair'], ['estimated_cost' => 35.50, 'category_id' => $category->id]);
 
-        // 5. Seed Diagnostic Articles
         DiagnosticArticle::firstOrCreate(
             ['title' => 'Drill Motor Diagnosis'],
             ['content' => 'If the drill sparks excessively, check the carbon brushes...', 'author_id' => $user->id]
         );
 
-        // 6. Seed Tools with specific conditions
-        
         $baseTool = [
             'price' => 20.00,
             'description' => 'Test tool for maintenance module.',
@@ -69,8 +63,7 @@ class MaintenanceTestSeeder extends Seeder
             'maintenance_interval_uses' => 10,
         ];
 
-        // Tool 1: Standard Tool
-        Tool::create(array_merge($baseTool, [
+        $tool1 = Tool::create(array_merge($baseTool, [
             'title' => 'Standard Drill (Good Condition)',
             'usage_count' => 2,
             'needs_inspection' => false,
@@ -79,16 +72,14 @@ class MaintenanceTestSeeder extends Seeder
             'warranty_expiry_date' => Carbon::now()->addYears(1),
         ]));
 
-        // Tool 2: High Usage Tool (Needs Maintenance)
-        Tool::create(array_merge($baseTool, [
+        $tool2 = Tool::create(array_merge($baseTool, [
             'title' => 'High Usage Saw (Requires Maintenance)',
-            'usage_count' => 15, // Greater than maintenance_interval_uses (10)
+            'usage_count' => 15,
             'needs_inspection' => false,
             'is_unfit' => false,
             'safety_cert_expiry_date' => Carbon::now()->addMonths(6),
         ]));
 
-        // Tool 3: Needs Inspection
         Tool::create(array_merge($baseTool, [
             'title' => 'Dropped Hammer Drill (Needs Inspection)',
             'usage_count' => 5,
@@ -96,7 +87,6 @@ class MaintenanceTestSeeder extends Seeder
             'is_unfit' => false,
         ]));
 
-        // Tool 4: Expired Safety Certificate
         Tool::create(array_merge($baseTool, [
             'title' => 'Old Welder (Safety Cert Expired)',
             'usage_count' => 3,
@@ -105,21 +95,18 @@ class MaintenanceTestSeeder extends Seeder
             'safety_cert_expiry_date' => Carbon::now()->subDays(5),
         ]));
 
-        // Tool 5: Warranty Expired
         Tool::create(array_merge($baseTool, [
             'title' => 'Angle Grinder (Warranty Expired)',
             'usage_count' => 8,
             'warranty_expiry_date' => Carbon::now()->subMonth(),
         ]));
 
-        // Tool 6: Unfit for Use
         Tool::create(array_merge($baseTool, [
             'title' => 'Broken Jigsaw (Unfit for Use)',
             'condition_status' => 'Needs Repair',
             'is_unfit' => true,
         ]));
 
-        // Tool 7: Battery Health Log Tool
         $batteryTool = Tool::create(array_merge($baseTool, [
             'title' => 'Cordless Drill (Battery Monitored)',
         ]));
@@ -130,7 +117,6 @@ class MaintenanceTestSeeder extends Seeder
             'logged_at' => Carbon::now()
         ]);
 
-        // Tool 8: In External Repair
         $repairTool = Tool::create(array_merge($baseTool, [
             'title' => 'Table Saw (Out for Repair)',
             'is_unfit' => true,
@@ -143,7 +129,6 @@ class MaintenanceTestSeeder extends Seeder
             'status' => 'dispatched'
         ]);
 
-        // Tool 9: Disposed Tool
         $disposedTool = Tool::create(array_merge($baseTool, [
             'title' => 'Burnt Out Sander (Disposed)',
             'is_unfit' => true,
@@ -155,7 +140,6 @@ class MaintenanceTestSeeder extends Seeder
             'disposed_at' => Carbon::now()->subDay()
         ]);
 
-        // Tool 10: Spare Part Ordered
         $sparePartTool = Tool::create(array_merge($baseTool, [
             'title' => 'Air Compressor (Awaiting Parts)',
         ]));
@@ -165,6 +149,49 @@ class MaintenanceTestSeeder extends Seeder
             'order_date' => Carbon::now()->subDays(1),
             'expected_arrival_date' => Carbon::now()->addDays(3),
             'status' => 'ordered'
+        ]);
+
+        MaintenanceLog::create([
+            'tool_id' => $tool1->id,
+            'status' => 'scheduled',
+            'technician_id' => $user->id,
+            'description' => 'Routine cleaning and safety check',
+            'cost' => 0.00,
+            'date' => Carbon::now()->format('Y-m-d')
+        ]);
+
+        MaintenanceLog::create([
+            'tool_id' => $tool2->id,
+            'status' => 'in-progress',
+            'technician_id' => $user->id,
+            'description' => 'Replacing worn blade bearings',
+            'cost' => 50.00,
+            'started_at' => Carbon::now()->subHours(2),
+            'date' => Carbon::now()->format('Y-m-d')
+        ]);
+
+        MaintenanceLog::create([
+            'tool_id' => $tool1->id,
+            'status' => 'done',
+            'technician_id' => $user->id,
+            'description' => 'Motor brushes alignment and switch servicing',
+            'cost' => 30.00,
+            'started_at' => Carbon::now()->subDays(2)->subMinutes(45),
+            'completed_at' => Carbon::now()->subDays(2),
+            'is_successful' => true,
+            'date' => Carbon::now()->subDays(2)->format('Y-m-d')
+        ]);
+
+        MaintenanceLog::create([
+            'tool_id' => $batteryTool->id ?? $tool1->id,
+            'status' => 'done',
+            'technician_id' => $user->id,
+            'description' => 'Battery terminal cleaning and diagnostics check',
+            'cost' => 15.00,
+            'started_at' => Carbon::now()->subDays(1)->subMinutes(30),
+            'completed_at' => Carbon::now()->subDays(1),
+            'is_successful' => true,
+            'date' => Carbon::now()->subDays(1)->format('Y-m-d')
         ]);
     }
 }

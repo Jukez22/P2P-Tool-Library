@@ -199,6 +199,12 @@ class MaintenanceController extends Controller
             ->whereNotNull('started_at')
             ->get();
 
+        if ($logs->isEmpty()) {
+            $logs = \App\Models\MaintenanceLog::whereNotNull('completed_at')
+                ->whereNotNull('started_at')
+                ->get();
+        }
+
         $totalCompleted = $logs->count();
         $totalSuccessful = $logs->where('is_successful', true)->count();
 
@@ -206,7 +212,7 @@ class MaintenanceController extends Controller
 
         $totalTimeMinutes = 0;
         foreach ($logs as $log) {
-            $totalTimeMinutes += \Carbon\Carbon::parse($log->completed_at)->diffInMinutes(\Carbon\Carbon::parse($log->started_at));
+            $totalTimeMinutes += abs(\Carbon\Carbon::parse($log->completed_at)->diffInMinutes(\Carbon\Carbon::parse($log->started_at)));
         }
 
         $avgCompletionTimeMinutes = $totalCompleted > 0 ? ($totalTimeMinutes / $totalCompleted) : 0;

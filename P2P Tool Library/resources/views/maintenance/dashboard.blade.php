@@ -39,7 +39,6 @@
 <div class="container-fluid">
   <div class="row">
 
-    <!-- Sidebar -->
     <div class="col-md-2 sidebar p-0 d-none d-md-block shadow-sm">
       <div class="section-head">Inspections</div>
       <button class="btn w-100 active-link" onclick="show('queue',this)">📋 Priority Queue</button>
@@ -61,7 +60,6 @@
       <button class="btn w-100" onclick="show('metrics',this)">📊 My Metrics</button>
     </div>
 
-    <!-- Content -->
     <div class="col-md-10 p-4">
 
       @if(session('success'))
@@ -71,7 +69,6 @@
         </div>
       @endif
 
-      <!-- Panel: Queue -->
       <div class="panel active" id="panel-queue">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <div>
@@ -123,7 +120,6 @@
         </div>
       </div>
 
-      <!-- Panel: Trigger -->
       <div class="panel" id="panel-trigger">
         <div class="fw-bold fs-5 mb-3">Usage-Based Maintenance Triggers</div>
         <div class="row g-4">
@@ -174,8 +170,7 @@
         </div>
       </div>
 
-      <!-- Panel: Safety -->
-      <div class="panel" id="panel-safety">
+      <div class="panel" id="panel-safety">  
         <div class="fw-bold fs-5 mb-3">Safety Certification Logger</div>
         <div class="card overflow-hidden">
           <table class="table align-middle mb-0">
@@ -250,7 +245,6 @@
         </div>
       </div>
 
-      <!-- Panel: Battery -->
       <div class="panel" id="panel-battery">
         <div class="fw-bold fs-5 mb-3">Battery Health Tracking</div>
         <div class="card overflow-hidden">
@@ -279,7 +273,6 @@
         </div>
       </div>
 
-      <!-- Panel: Estimator -->
       <div class="panel" id="panel-estimator">
         <div class="fw-bold fs-5 mb-3">Repair Cost Estimator</div>
         <div class="row g-4">
@@ -333,7 +326,6 @@
         </div>
       </div>
 
-      <!-- Panel: Metrics -->
       <div class="panel" id="panel-metrics">
         <div class="fw-bold fs-5 mb-3">My Performance Metrics</div>
         <div class="row g-4 text-center">
@@ -358,7 +350,6 @@
         </div>
       </div>
 
-      <!-- Panel: External -->
       <div class="panel" id="panel-external">
           <div class="fw-bold fs-5 mb-3">External Repairs</div>
           <div class="card overflow-hidden">
@@ -381,7 +372,6 @@
           </div>
       </div>
 
-      <!-- Panel: Spare Parts -->
       <div class="panel" id="panel-parts">
         <div class="fw-bold fs-5 mb-3">Replacement Part Procurement</div>
         <div class="card overflow-hidden">
@@ -409,7 +399,6 @@
         </div>
       </div>
 
-      <!-- Panel: Consumables -->
       <div class="panel" id="panel-consumables">
         <div class="fw-bold fs-5 mb-3">Consumables Inventory Tracker</div>
         <div class="card overflow-hidden">
@@ -445,7 +434,6 @@
         </div>
       </div>
 
-      <!-- Panel: Warranty -->
       <div class="panel" id="panel-warranty">
         <div class="fw-bold fs-5 mb-3">Warranty Expiry Alerts</div>
         <div class="card overflow-hidden">
@@ -474,7 +462,6 @@
         </div>
       </div>
 
-      <!-- Panel: Disposal -->
       <div class="panel" id="panel-disposal">
         <div class="fw-bold fs-5 mb-3">Disposal / Recycle Workflow</div>
         <div class="card overflow-hidden">
@@ -497,7 +484,7 @@
         </div>
       </div>
 
-      <!-- Panel: Knowledge Base -->
+  
       <div class="panel" id="panel-knowledgebase">
         <div class="fw-bold fs-5 mb-3">Technical Knowledge Base</div>
         <div class="row g-4">
@@ -540,11 +527,36 @@
         </div>
       </div>
 
+      <div class="panel" id="panel-metrics">
+        <div class="fw-bold fs-5 mb-1">My Performance Metrics</div>
+        <div class="text-secondary small mb-4">Overall diagnostic accuracy and efficiency statistics</div>
+        <div class="row g-4 text-center">
+          <div class="col-md-4">
+            <div class="card p-4 border-primary border-top border-3 shadow-sm">
+              <div class="display-5 fw-bold text-primary mb-1">{{ $metrics->total_repairs_completed ?? 0 }}</div>
+              <div class="small fw-bold text-secondary text-uppercase tracking-wider">Repairs Completed</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-4 border-success border-top border-3 shadow-sm">
+              <div class="display-5 fw-bold text-success mb-1">{{ $metrics->success_rate_percentage ?? 0 }}%</div>
+              <div class="small fw-bold text-secondary text-uppercase tracking-wider">Success Rate</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-4 border-info border-top border-3 shadow-sm">
+              <div class="display-5 fw-bold text-info mb-1">{{ $metrics->avg_completion_time_minutes ?? 0 }}m</div>
+              <div class="small fw-bold text-secondary text-uppercase tracking-wider">Avg. Time Per Task</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   function show(id, el) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));

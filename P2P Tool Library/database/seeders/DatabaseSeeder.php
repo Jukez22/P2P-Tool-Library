@@ -10,7 +10,6 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    // Seed the database
     public function run(): void
     {
         $this->call([
