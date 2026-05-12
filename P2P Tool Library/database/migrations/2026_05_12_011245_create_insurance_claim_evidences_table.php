@@ -11,12 +11,11 @@ return new class extends Migration
     {
         Schema::create('insurance_claim_evidences', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('insurance_claim_id')
-                ->constrained('insurance_claims')
+            $table->unsignedBigInteger('insurance_claim_id'); $table->foreign('insurance_claim_id')->references('id')->on('insurance_claims')
                 ->cascadeOnDelete();
             $table->enum('evidence_type', ['image', 'video', 'police_report', 'receipt', 'other']);
             $table->string('file_path');
-            $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
+            $table->integer('uploaded_by'); $table->foreign('uploaded_by')->references('id')->on('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -27,3 +26,10 @@ return new class extends Migration
         Schema::dropIfExists('insurance_claim_evidences');
     }
 };
+
+
+
+
+
+
+

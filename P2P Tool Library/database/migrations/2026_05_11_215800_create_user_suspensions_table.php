@@ -13,15 +13,13 @@ class CreateUserSuspensionsTable extends Migration
     {
         Schema::create('user_suspensions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')
-                  ->constrained('users')
+            $table->integer('user_id'); $table->foreign('user_id')->references('id')->on('users')
                   ->cascadeOnDelete();
             $table->enum('type', ['temporary', 'permanent']);
             $table->text('reason');
             $table->timestamp('suspended_until')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->foreignId('created_by')
-                  ->constrained('users');
+            $table->integer('created_by'); $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();
         });
     }
@@ -35,3 +33,10 @@ class CreateUserSuspensionsTable extends Migration
         Schema::dropIfExists('user_suspensions');
     }
 }
+
+
+
+
+
+
+

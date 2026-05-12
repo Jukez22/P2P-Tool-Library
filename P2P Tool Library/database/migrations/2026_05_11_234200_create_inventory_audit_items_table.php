@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('inventory_audit_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('inventory_audit_id')->constrained('inventory_audits')->cascadeOnDelete();
-            $table->foreignId('tool_id')->constrained('tools')->cascadeOnDelete();
+            $table->unsignedBigInteger('inventory_audit_id'); $table->foreign('inventory_audit_id')->references('id')->on('inventory_audits')->cascadeOnDelete();
+            $table->integer('tool_id'); $table->foreign('tool_id')->references('id')->on('tools')->cascadeOnDelete();
             $table->string('proof_image')->nullable();
             $table->string('proof_video')->nullable();
             $table->enum('item_status', ['pending', 'submitted', 'approved', 'rejected'])->default('pending');
@@ -31,3 +31,10 @@ return new class extends Migration
         Schema::dropIfExists('inventory_audit_items');
     }
 };
+
+
+
+
+
+
+

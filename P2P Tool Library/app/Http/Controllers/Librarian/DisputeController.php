@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Librarian;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Dispute;
 use App\Models\DisputeEvidence;

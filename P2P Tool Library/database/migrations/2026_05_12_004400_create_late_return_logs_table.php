@@ -11,8 +11,7 @@ return new class extends Migration
     {
         Schema::create('late_return_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('late_return_escalation_id')
-                ->constrained('late_return_escalations')
+            $table->unsignedBigInteger('late_return_escalation_id'); $table->foreign('late_return_escalation_id')->references('id')->on('late_return_escalations')
                 ->cascadeOnDelete();
             $table->enum('notification_type', ['email', 'sms']);
             $table->text('message');
@@ -27,3 +26,10 @@ return new class extends Migration
         Schema::dropIfExists('late_return_logs');
     }
 };
+
+
+
+
+
+
+

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('dispute_evidences', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('dispute_id')->constrained('disputes')->cascadeOnDelete();
-            $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
+            $table->unsignedBigInteger('dispute_id'); $table->foreign('dispute_id')->references('id')->on('disputes')->cascadeOnDelete();
+            $table->integer('uploaded_by'); $table->foreign('uploaded_by')->references('id')->on('users')->cascadeOnDelete();
             $table->enum('evidence_type', ['image', 'video', 'log']);
             $table->string('file_path')->nullable();
             $table->text('message')->nullable();
@@ -30,3 +30,10 @@ return new class extends Migration
         Schema::dropIfExists('dispute_evidences');
     }
 };
+
+
+
+
+
+
+

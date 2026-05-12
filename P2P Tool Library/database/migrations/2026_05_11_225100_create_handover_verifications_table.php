@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('handover_verifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('borrow_id')->constrained('borrows')->cascadeOnDelete();
+            $table->integer('borrow_id'); $table->foreign('borrow_id')->references('id')->on('reservations')->cascadeOnDelete();
             $table->string('qr_code')->unique();
             $table->boolean('is_verified')->default(false);
             $table->timestamp('verified_at')->nullable();
@@ -25,3 +25,10 @@ return new class extends Migration
         Schema::dropIfExists('handover_verifications');
     }
 };
+
+
+
+
+
+
+

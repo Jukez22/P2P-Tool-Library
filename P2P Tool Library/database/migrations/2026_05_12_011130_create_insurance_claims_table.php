@@ -11,15 +11,15 @@ return new class extends Migration
     {
         Schema::create('insurance_claims', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('borrow_id')->constrained('borrows')->cascadeOnDelete();
-            $table->foreignId('tool_id')->constrained('tools')->cascadeOnDelete();
-            $table->foreignId('claimant_id')->constrained('users')->cascadeOnDelete();
+            $table->integer('borrow_id'); $table->foreign('borrow_id')->references('id')->on('reservations')->cascadeOnDelete();
+            $table->integer('tool_id'); $table->foreign('tool_id')->references('id')->on('tools')->cascadeOnDelete();
+            $table->integer('claimant_id'); $table->foreign('claimant_id')->references('id')->on('users')->cascadeOnDelete();
             $table->enum('claim_type', ['theft', 'total_destruction']);
             $table->enum('claim_status', ['pending', 'under_review', 'approved', 'rejected', 'completed'])->default('pending');
             $table->text('incident_description');
             $table->decimal('estimated_loss', 10, 2);
             $table->string('insurance_report')->nullable();
-            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->integer('reviewed_by')->nullable(); $table->foreign('reviewed_by')->references('id')->on('users')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
@@ -32,3 +32,10 @@ return new class extends Migration
         Schema::dropIfExists('insurance_claims');
     }
 };
+
+
+
+
+
+
+

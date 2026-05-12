@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('late_return_escalations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('borrow_id')->constrained('borrows')->cascadeOnDelete();
+            $table->integer('borrow_id'); $table->foreign('borrow_id')->references('id')->on('reservations')->cascadeOnDelete();
             $table->enum('escalation_level', ['warning', 'penalty_level_1', 'penalty_level_2', 'final_notice']);
             $table->integer('days_late')->default(0);
             $table->decimal('penalty_amount', 10, 2)->default(0);
@@ -28,3 +28,10 @@ return new class extends Migration
         Schema::dropIfExists('late_return_escalations');
     }
 };
+
+
+
+
+
+
+

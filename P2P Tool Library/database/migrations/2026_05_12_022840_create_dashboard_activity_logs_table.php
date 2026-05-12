@@ -19,9 +19,9 @@ return new class extends Migration
                 'tool_reserved',
                 'payment_received'
             ]);
-            $table->foreignId('borrow_id')->nullable()->constrained('borrows')->nullOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('tool_id')->nullable()->constrained('tools')->nullOnDelete();
+            $table->integer('borrow_id')->nullable(); $table->foreign('borrow_id')->references('id')->on('reservations')->nullOnDelete();
+            $table->integer('user_id')->nullable(); $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
+            $table->integer('tool_id')->nullable(); $table->foreign('tool_id')->references('id')->on('tools')->nullOnDelete();
             $table->text('activity_message');
             $table->timestamp('activity_time');
             $table->timestamps();
@@ -34,3 +34,10 @@ return new class extends Migration
         Schema::dropIfExists('dashboard_activity_logs');
     }
 };
+
+
+
+
+
+
+

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('tool_category_mappings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tool_id')->constrained('tools')->cascadeOnDelete();
-            $table->foreignId('tool_category_id')->constrained('tool_categories')->cascadeOnDelete();
+            $table->integer('tool_id'); $table->foreign('tool_id')->references('id')->on('tools')->cascadeOnDelete();
+            $table->unsignedBigInteger('tool_category_id'); $table->foreign('tool_category_id')->references('id')->on('tool_categories')->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -27,3 +27,10 @@ return new class extends Migration
         Schema::dropIfExists('tool_category_mappings');
     }
 };
+
+
+
+
+
+
+

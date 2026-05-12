@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tool_categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('parent_id')->nullable()->constrained('tool_categories')->nullOnDelete();
+            $table->unsignedBigInteger('parent_id')->nullable(); $table->foreign('parent_id')->references('id')->on('tool_categories')->nullOnDelete();
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->text('description')->nullable();
@@ -31,3 +31,10 @@ return new class extends Migration
         Schema::dropIfExists('tool_categories');
     }
 };
+
+
+
+
+
+
+

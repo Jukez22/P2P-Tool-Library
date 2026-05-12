@@ -11,13 +11,13 @@ return new class extends Migration
     {
         Schema::create('inventory_audits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lender_id')->constrained('users')->cascadeOnDelete();
+            $table->integer('lender_id'); $table->foreign('lender_id')->references('id')->on('users')->cascadeOnDelete();
             $table->enum('audit_status', ['pending', 'submitted', 'approved', 'rejected', 'expired'])->default('pending');
             $table->timestamp('assigned_at')->useCurrent();
             $table->timestamp('submitted_at')->nullable();
             $table->timestamp('reviewed_at')->nullable();
             $table->timestamp('expires_at')->nullable();
-            $table->foreignId('reviewer_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->integer('reviewer_id')->nullable(); $table->foreign('reviewer_id')->references('id')->on('users')->nullOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
         });
@@ -29,3 +29,10 @@ return new class extends Migration
         Schema::dropIfExists('inventory_audits');
     }
 };
+
+
+
+
+
+
+
