@@ -21,7 +21,6 @@ class HandoverVerification extends Model
         'is_verified' => 'boolean',
     ];
 
-    // Link to the borrow record
     public function reservation()
     {
         return $this->belongsTo(Reservation::class, 'borrow_id');

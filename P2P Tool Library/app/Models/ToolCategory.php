@@ -22,19 +22,16 @@ class ToolCategory extends Model
         'is_active' => 'boolean',
     ];
 
-    // Parent category
     public function parent()
     {
         return $this->belongsTo(ToolCategory::class, 'parent_id');
     }
 
-    // Subcategories
     public function children()
     {
         return $this->hasMany(ToolCategory::class, 'parent_id');
     }
 
-    // Tools in this category
     public function tools()
     {
         return $this->belongsToMany(Tool::class, 'tool_category_mappings', 'tool_category_id', 'tool_id');

@@ -15,13 +15,11 @@ class LateReturnMail extends Mailable
 
     public $escalation;
 
-    // constructor
     public function __construct(LateReturnEscalation $escalation)
     {
         $this->escalation = $escalation->load(['borrow.tool', 'borrow.borrower']);
     }
 
-    // Email envelope
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -29,7 +27,6 @@ class LateReturnMail extends Mailable
         );
     }
 
-    // Email view
     public function content(): Content
     {
         return new Content(

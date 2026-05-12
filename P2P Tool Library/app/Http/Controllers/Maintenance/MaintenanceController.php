@@ -12,48 +12,36 @@ class MaintenanceController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
-        // 1. Priority Queue
+
         $queue = \App\Models\MaintenanceLog::with('tool')
             ->whereIn('status', ['scheduled', 'in-progress', 'pending'])
             ->get();
 
-        // 2. Usage Triggers
         $toolsForTriggers = Tool::all();
 
-        // 3. Safety Certs — guard against missing column
         $safetyTools = \Illuminate\Support\Facades\Schema::hasColumn('tools', 'safety_cert_expiry_date')
             ? Tool::whereNotNull('safety_cert_expiry_date')->get()
             : collect();
 
-        // 4. Battery Health — use the dedicated BatteryHealthLog model
         $batteryTools = \App\Models\BatteryHealthLog::with('tool')->latest()->get();
 
-        // 5. Cost Estimator Data
         $categories = \App\Models\Category::all();
         $estimates = \App\Models\RepairCostEstimate::all();
 
-        // 6. External Repairs
         $externalRepairs = \App\Models\ExternalRepair::with('tool')->get();
 
-        // 7. Spare Part Orders
         $sparePartOrders = \App\Models\SparePartOrder::with('tool')->get();
 
-        // 8. Consumables
         $consumables = \App\Models\Consumable::all();
 
-        // 9. Warranty Alerts — guard against missing column
         $warrantyTools = \Illuminate\Support\Facades\Schema::hasColumn('tools', 'warranty_expiry_date')
             ? Tool::whereNotNull('warranty_expiry_date')->orderBy('warranty_expiry_date', 'asc')->get()
             : collect();
 
-        // 10. Disposal Workflow
         $disposals = \App\Models\Disposal::with('tool')->get();
 
-        // 11. Knowledge Base
         $articles = \App\Models\DiagnosticArticle::all();
 
-        // 12. Tech Metrics (Self)
         $metrics = $this->getTechnicianMetrics($user->id)->getData();
 
         return view('maintenance.dashboard', compact(
@@ -62,7 +50,6 @@ class MaintenanceController extends Controller
             'consumables', 'warrantyTools', 'disposals', 'articles', 'metrics'
         ));
     }
-
 
     public function store(Request $request)
     {
@@ -86,13 +73,13 @@ class MaintenanceController extends Controller
         ]);
 
         $tool = Tool::findOrFail($request->tool_id);
-        
+
         $tool->usage_count += 1;
-        
+
         if ($tool->usage_count >= $tool->maintenance_interval_uses) {
             $tool->needs_inspection = true;
         }
-        
+
         $tool->save();
 
         return response()->json([
@@ -158,10 +145,10 @@ class MaintenanceController extends Controller
     public function getPriorityQueue()
     {
         $queue = \App\Models\MaintenanceLog::with('tool')
-            ->whereIn('status', ['scheduled', 'in-progress', '']) // 'pending' equivalents
+            ->whereIn('status', ['scheduled', 'in-progress', '']) 
             ->join('tools', 'maintenance_logs.tool_id', '=', 'tools.id')
             ->leftJoin('reservations', 'tools.id', '=', 'reservations.tool_id')
-            ->select('maintenance_logs.*') // Select only log columns
+            ->select('maintenance_logs.*') 
             ->selectRaw('count(reservations.id) as past_reservations')
             ->groupBy('maintenance_logs.id')
             ->orderBy('past_reservations', 'desc')
@@ -182,7 +169,7 @@ class MaintenanceController extends Controller
 
         $totalCompleted = $logs->count();
         $totalSuccessful = $logs->where('is_successful', true)->count();
-        
+
         $successRate = $totalCompleted > 0 ? ($totalSuccessful / $totalCompleted) * 100 : 0;
 
         $totalTimeMinutes = 0;

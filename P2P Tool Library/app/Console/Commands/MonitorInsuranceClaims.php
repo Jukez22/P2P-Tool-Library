@@ -10,13 +10,11 @@ use Illuminate\Support\Facades\Log;
 
 class MonitorInsuranceClaims extends Command
 {
-    // command signature
+
     protected $signature = 'app:monitor-insurance-claims';
 
-    // command description
     protected $description = 'Monitor insurance claims for delays';
 
-    // execute command
     public function handle()
     {
         $this->info('Starting insurance claim monitoring...');
@@ -25,7 +23,6 @@ class MonitorInsuranceClaims extends Command
         $pendingThreshold = $now->copy()->subDays(3);
         $reviewThreshold = $now->copy()->subDays(7);
 
-        // Delayed pending claims (3+ days)
         $delayedPending = InsuranceClaim::where('claim_status', 'pending')
             ->where('created_at', '<=', $pendingThreshold)
             ->get();
@@ -35,7 +32,6 @@ class MonitorInsuranceClaims extends Command
             $this->notifyAdmins("Delayed Pending Claims", $delayedPending);
         }
 
-        // Escalated unresolved claims (7+ days)
         $escalatedClaims = InsuranceClaim::where('claim_status', 'under_review')
             ->where('updated_at', '<=', $reviewThreshold)
             ->get();
@@ -48,12 +44,10 @@ class MonitorInsuranceClaims extends Command
         $this->info('Monitoring completed.');
     }
 
-    // Notify admins about delayed claims
     protected function notifyAdmins(string $type, $claims)
     {
         $message = "[Insurance Monitor] {$type}: " . $claims->pluck('id')->implode(', ');
-        
-        // Log for now
+
         Log::warning($message);
     }
 }

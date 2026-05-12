@@ -47,7 +47,6 @@ class AuthController extends Controller
         return back()->withErrors(['email' => 'The credentials are not correct.'])->onlyInput('email');
     }
 
-
     public function showRegister()
     {
         return view('auth.register');
@@ -83,19 +82,19 @@ class AuthController extends Controller
     protected function redirectUserByRole($user)
     {
         $role = $user->role;
-        
+
         if ($role == 'borrower' || $role == 'lender') {
             return redirect()->intended(route('member.dashboard'));
         }
-        
+
         if ($role == 'librarian') {
             return redirect()->intended(route('librarian.dashboard'));
         }
-        
+
         if ($role == 'technician') {
             return redirect()->intended(route('maintenance.dashboard'));
         }
-        
+
         return redirect()->intended('/');
     }
 

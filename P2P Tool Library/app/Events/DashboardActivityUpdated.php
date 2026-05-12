@@ -17,13 +17,11 @@ class DashboardActivityUpdated implements ShouldBroadcast
 
     public $activity;
 
-    // Constructor
     public function __construct(DashboardActivityLog $activity)
     {
         $this->activity = $activity->load(['user', 'tool', 'borrow']);
     }
 
-    // Broadcast channels
     public function broadcastOn(): array
     {
         return [
@@ -31,7 +29,6 @@ class DashboardActivityUpdated implements ShouldBroadcast
         ];
     }
 
-    // Broadcast name
     public function broadcastAs(): string
     {
         return 'activity.updated';

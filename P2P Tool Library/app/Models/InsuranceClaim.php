@@ -34,25 +34,21 @@ class InsuranceClaim extends Model
         return $this->belongsTo(Reservation::class, 'borrow_id');
     }
 
-    // The tool
     public function tool()
     {
         return $this->belongsTo(Tool::class);
     }
 
-    // User who filed the claim
     public function claimant()
     {
         return $this->belongsTo(User::class, 'claimant_id');
     }
 
-    // Admin/Librarian reviewer
     public function reviewer()
     {
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
-    // Supporting evidence
     public function evidences()
     {
         return $this->hasMany(InsuranceClaimEvidence::class);

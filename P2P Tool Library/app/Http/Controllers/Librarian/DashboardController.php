@@ -48,7 +48,6 @@ class DashboardController extends Controller
         $recentRefunds = \App\Models\Payment::with('reservation.borrower')->where('status', 'refunded')->latest()->get();
         $allUsers = \App\Models\User::all();
 
-        // Financial metrics calculated dynamically from actual records
         $totalRevenue = Reservation::whereIn('status', ['Confirmed', 'Completed', 'Active'])->sum('total_price') ?: 12450;
         $platformFees = $totalRevenue * 0.05;
         $lenderPayouts = $totalRevenue * 0.90;
@@ -65,7 +64,7 @@ class DashboardController extends Controller
         try {
             $campaigns = \App\Models\PromotionCampaign::latest()->get();
         } catch (\Exception $e) {
-            // Gracefully catch if the table hasn't been migrated yet
+
         }
 
         return view('librarian.dashboard', compact(
@@ -102,7 +101,6 @@ class DashboardController extends Controller
         ));
     }
 
-    // Review pending tool listings (Approve/Reject)
     public function reviewTool(Request $request, $id)
     {
         $tool = \App\Models\Tool::find($id);

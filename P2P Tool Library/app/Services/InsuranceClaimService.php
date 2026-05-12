@@ -7,22 +7,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Exception;
 
-// Logic for insurance claims
 class InsuranceClaimService
 {
-    // Calculate compensation based on tool value
+
     public function calculateCompensation(InsuranceClaim $claim): float
     {
-        $toolValue = $claim->tool->price; // replacement value
+        $toolValue = $claim->tool->price; 
         $lossEstimate = (float) $claim->estimated_loss;
 
-        // Compensation: 90% of tool value or estimate, whichever is lower
         $compensation = min($toolValue * 0.9, $lossEstimate);
 
         return round($compensation, 2);
     }
 
-    // Check if claim is valid (evidence, police report etc)
     public function validateClaim(InsuranceClaim $claim): void
     {
         if ($claim->evidences->count() === 0) {
@@ -34,7 +31,6 @@ class InsuranceClaimService
         }
     }
 
-    // Generate formal document for storage
     public function generateInsuranceDocument(InsuranceClaim $claim): string
     {
         return DB::transaction(function () use ($claim) {

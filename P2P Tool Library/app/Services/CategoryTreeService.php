@@ -4,10 +4,9 @@ namespace App\Services;
 
 use App\Models\ToolCategory;
 
-// Manage hierarchical stuff for categories
 class CategoryTreeService
 {
-    // Build the full tree
+
     public function buildTree()
     {
         $allCategories = ToolCategory::where('is_active', true)->get();
@@ -15,15 +14,13 @@ class CategoryTreeService
         return $this->formatTree($allCategories);
     }
 
-    // Get child IDs recursively
     public function getAllChildIds(int $parentId): array
     {
         $allCategories = ToolCategory::all(); 
-        
+
         return $this->findChildIds($allCategories, $parentId);
     }
 
-    // Format flat collection into nested tree
     protected function formatTree($categories, $parentId = null)
     {
         $branch = [];
@@ -41,7 +38,6 @@ class CategoryTreeService
         return collect($branch);
     }
 
-    // Find children IDs in the collection
     protected function findChildIds($categories, $parentId): array
     {
         $ids = [];

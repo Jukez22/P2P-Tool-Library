@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class InsuranceClaimController extends Controller
 {
-    // Create new insurance claim
+
     public function createClaim(Request $request)
     {
         $request->validate([
@@ -41,7 +41,6 @@ class InsuranceClaimController extends Controller
         ], 201);
     }
 
-    // Attach evidence to claim
     public function uploadEvidence(Request $request, $claimId)
     {
         $request->validate([
@@ -72,7 +71,6 @@ class InsuranceClaimController extends Controller
         ], 201);
     }
 
-    // Generate formal report for the claim
     public function generateReport($claimId)
     {
         $claim = InsuranceClaim::with(['claimant', 'tool', 'borrow', 'evidences'])->find($claimId);
@@ -94,7 +92,7 @@ class InsuranceClaimController extends Controller
 
         $reportContent = json_encode($reportData, JSON_PRETTY_PRINT);
         $reportPath = 'insurance/reports/claim_' . $claim->id . '_report.json';
-        
+
         \Illuminate\Support\Facades\Storage::disk('public')->put($reportPath, $reportContent);
 
         $claim->update([
@@ -108,7 +106,6 @@ class InsuranceClaimController extends Controller
         ]);
     }
 
-    // Approve or reject claim
     public function reviewClaim(Request $request, $claimId)
     {
         $request->validate([
@@ -136,7 +133,6 @@ class InsuranceClaimController extends Controller
         ]);
     }
 
-    // Finalize claim
     public function completeClaim($claimId)
     {
         $claim = InsuranceClaim::find($claimId);
@@ -158,7 +154,6 @@ class InsuranceClaimController extends Controller
         ]);
     }
 
-    // Direct dashboard form store
     public function dashboardStore(Request $request)
     {
         $request->validate([

@@ -14,12 +14,11 @@ class ReservationController extends Controller
     {
         $userId = auth()->id();
 
-        // Show reservations where user is the borrower OR the tool owner
         $reservations = Reservation::where('borrower_id', $userId)
             ->orWhereHas('tool', function ($query) use ($userId) {
                 $query->where('owner_id', $userId);
             })
-            ->with(['tool', 'borrower']) // Optional: load relationships for better UI
+            ->with(['tool', 'borrower']) 
             ->get();
 
         return response()->json($reservations);
@@ -34,13 +33,11 @@ class ReservationController extends Controller
         ]);
 
         $tool = Tool::findOrFail($request->tool_id);
-        
-        // Prevent users from reserving their own tools
+
         if ($tool->owner_id == auth()->id()) {
             return redirect()->back()->with('error', 'You cannot reserve your own listed tools.');
         }
-        
-        // Calculate total price (simplified logic for demonstration)
+
         $start = new \DateTime($request->start_datetime);
         $end = new \DateTime($request->end_datetime);
         $days = max(1, $start->diff($end)->days + 1);
@@ -70,7 +67,6 @@ class ReservationController extends Controller
             abort(404);
         }
 
-        // Authorization: Must be borrower or tool owner
         if ($reservation->borrower_id !== $userId && $reservation->tool->owner_id !== $userId) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -87,7 +83,6 @@ class ReservationController extends Controller
             return response()->json(['message' => 'Reservation not found'], 404);
         }
 
-        // Authorization
         if ($reservation->borrower_id !== $userId && $reservation->tool->owner_id !== $userId) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -110,7 +105,6 @@ class ReservationController extends Controller
             return response()->json(['message' => 'Reservation not found'], 404);
         }
 
-        // Only borrower can delete/cancel their own reservation request
         if ($reservation->borrower_id !== $userId) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -120,7 +114,6 @@ class ReservationController extends Controller
         return redirect()->route('member.dashboard')->with('success', 'Reservation cancelled successfully!');
     }
 
-    // Get the raw QR string for a reservation
     public function getReservationQR($id)
     {
         $reservation = Reservation::with('handoverVerification')->find($id);

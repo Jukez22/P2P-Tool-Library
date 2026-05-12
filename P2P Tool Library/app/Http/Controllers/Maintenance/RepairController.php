@@ -49,7 +49,6 @@ class RepairController extends Controller
             'status' => 'dispatched'
         ]);
 
-        // Optionally, update tool status to unfit
         $tool = Tool::findOrFail($request->tool_id);
         $tool->is_unfit = true; 
         $tool->save();
@@ -108,7 +107,7 @@ class RepairController extends Controller
 
         $totalCompleted = $logs->count();
         $totalSuccessful = $logs->where('is_successful', true)->count();
-        
+
         $successRate = $totalCompleted > 0 ? ($totalSuccessful / $totalCompleted) * 100 : 0;
 
         $totalTimeMinutes = 0;

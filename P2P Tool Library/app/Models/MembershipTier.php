@@ -21,9 +21,6 @@ class MembershipTier extends Model
         'max_active_rentals' => 'integer',
     ];
 
-    /**
-     * Get the users that belong to this membership tier.
-     */
     public function users()
     {
         return $this->hasMany(User::class);

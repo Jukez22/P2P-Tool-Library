@@ -14,19 +14,16 @@ class LateReturnNotification extends Notification implements ShouldQueue
 
     protected $escalation;
 
-    // constructor
     public function __construct(LateReturnEscalation $escalation)
     {
         $this->escalation = $escalation->load(['borrow.tool']);
     }
 
-    // channels: mail and db
     public function via(object $notifiable): array
     {
         return ['mail', 'database'];
     }
 
-    // Email
     public function toMail(object $notifiable): MailMessage
     {
         $toolName = $this->escalation->borrow->tool->title;
@@ -48,7 +45,6 @@ class LateReturnNotification extends Notification implements ShouldQueue
         return $mail;
     }
 
-    // DB array
     public function toArray(object $notifiable): array
     {
         return [
@@ -59,9 +55,8 @@ class LateReturnNotification extends Notification implements ShouldQueue
         ];
     }
 
-    // Placeholder for SMS logic
     public function toSms(object $notifiable)
     {
-        // SMS delivery logic
+
     }
 }

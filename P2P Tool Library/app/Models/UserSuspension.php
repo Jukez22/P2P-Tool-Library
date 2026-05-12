@@ -23,13 +23,11 @@ class UserSuspension extends Model
         'is_active'       => 'boolean',
     ];
 
-    // The suspended user
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Librarian who issued it
     public function librarian()
     {
         return $this->belongsTo(User::class, 'created_by');

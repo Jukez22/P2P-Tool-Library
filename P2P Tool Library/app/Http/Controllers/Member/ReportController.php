@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
-    // List user reports
+
     public function index()
     {
         $reports = Report::where('reporter_id', Auth::id())->get();
@@ -20,12 +20,12 @@ class ReportController extends Controller
     {
         $reservation_id = $request->reservation_id;
         $tool_id = $request->tool_id;
-        
+
         $reported_user_id = null;
         if ($reservation_id) {
             $reservation = \App\Models\Reservation::with('tool')->find($reservation_id);
             if ($reservation) {
-                // If I am the borrower, I report the owner. If I am the owner, I report the borrower.
+
                 $reported_user_id = (auth()->id() == $reservation->borrower_id) 
                     ? $reservation->tool->owner_id 
                     : $reservation->borrower_id;
@@ -35,7 +35,6 @@ class ReportController extends Controller
         return view('member.reports.create', compact('reservation_id', 'tool_id', 'reported_user_id'));
     }
 
-    // Submit a new report
     public function store(Request $request)
     {
         $request->validate([
@@ -59,7 +58,6 @@ class ReportController extends Controller
         return redirect()->route('member.dashboard')->with('success', 'Damage report submitted. Our team will review it soon.');
     }
 
-    // View specific report
     public function show($id)
     {
         $report = Report::where('id', $id)
@@ -73,7 +71,6 @@ class ReportController extends Controller
         return response()->json($report);
     }
 
-    // Delete pending report
     public function destroy($id)
     {
         $report = Report::where('id', $id)

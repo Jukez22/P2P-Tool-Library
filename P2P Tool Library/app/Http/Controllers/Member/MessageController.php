@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
-    // Conversations list
+
     public function index()
     {
         $userId = Auth::id();
@@ -23,11 +23,10 @@ class MessageController extends Controller
             ->get();
 
         $contacts = User::whereIn('id', $conversations->pluck('contact_id'))->get();
-        
+
         return view('member.messages.index', compact('contacts'));
     }
 
-    // View chat history
     public function show($contactId)
     {
         $userId = Auth::id();
@@ -43,15 +42,13 @@ class MessageController extends Controller
 
         $contact = User::findOrFail($contactId);
 
-        // Mark messages as read when viewing them
         Message::where('sender_id', $contactId)
             ->where('receiver_id', $userId)
             ->update(['is_read' => true]);
 
-        return view('member.messages.show', compact('messages', 'contact'));
+        return redirect()->route('member.dashboard', ['panel' => 'messages', 'contact_id' => $contactId]);
     }
 
-    // Send message
     public function store(Request $request)
     {
         $request->validate([

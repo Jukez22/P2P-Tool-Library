@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Notification;
 
 class DisputeController extends Controller
 {
-    // Create new dispute for a borrow
+
     public function createDispute(Request $request)
     {
         $request->validate([
@@ -26,12 +26,11 @@ class DisputeController extends Controller
         $dispute = Dispute::create([
             'borrow_id'      => $request->borrow_id,
             'borrower_id'    => Auth::id(),
-            'lender_id'      => 0, // placeholder
+            'lender_id'      => 0, 
             'dispute_reason' => $request->dispute_reason,
             'dispute_status' => 'pending',
         ]);
 
-        // Notify Lender (and borrower confirmation)
         Notification::send(Auth::user(), new DisputeNotification($dispute, 'created'));
 
         return response()->json([
@@ -40,12 +39,11 @@ class DisputeController extends Controller
         ], 201);
     }
 
-    // Upload evidence for dispute
     public function uploadEvidence(Request $request, $disputeId)
     {
         $request->validate([
             'evidence_type' => 'required|in:image,video,log',
-            'file'          => 'nullable|file|max:10240', // max 10MB
+            'file'          => 'nullable|file|max:10240', 
             'message'       => 'nullable|string',
         ]);
 
@@ -68,7 +66,6 @@ class DisputeController extends Controller
             'message'       => $request->message,
         ]);
 
-        // Notify parties
         $dispute->borrower->notify(new DisputeNotification($dispute, 'evidence'));
 
         return response()->json([
@@ -77,7 +74,6 @@ class DisputeController extends Controller
         ], 201);
     }
 
-    // List pending disputes
     public function getPendingDisputes()
     {
         $disputes = Dispute::with(['borrower', 'lender', 'evidences', 'borrow'])
@@ -89,7 +85,6 @@ class DisputeController extends Controller
         ]);
     }
 
-    // Start reviewing a dispute
     public function startReview($disputeId)
     {
         $dispute = Dispute::find($disputeId);
@@ -103,7 +98,6 @@ class DisputeController extends Controller
             'librarian_id'   => Auth::id(),
         ]);
 
-        // Notify both parties
         $dispute->borrower->notify(new DisputeNotification($dispute, 'review'));
 
         return response()->json([
@@ -112,7 +106,6 @@ class DisputeController extends Controller
         ]);
     }
 
-    // Resolve dispute with final decision
     public function resolveDispute(Request $request, $disputeId)
     {
         $request->validate([
@@ -135,7 +128,6 @@ class DisputeController extends Controller
             'resolved_at'       => Carbon::now(),
         ]);
 
-        // Notify parties
         $dispute->borrower->notify(new DisputeNotification($dispute, 'resolved'));
 
         return response()->json([
@@ -144,7 +136,6 @@ class DisputeController extends Controller
         ]);
     }
 
-    // Reject dispute
     public function rejectDispute(Request $request, $disputeId)
     {
         $request->validate([
@@ -163,7 +154,6 @@ class DisputeController extends Controller
             'resolved_at'    => Carbon::now(),
         ]);
 
-        // Notify parties
         $dispute->borrower->notify(new DisputeNotification($dispute, 'rejected'));
 
         return response()->json([
@@ -172,7 +162,6 @@ class DisputeController extends Controller
         ]);
     }
 
-    // Standard web action to resolve disputes from Librarian dashboard
     public function dashboardResolve(Request $request, $id)
     {
         $dispute = Dispute::find($id);
@@ -207,7 +196,6 @@ class DisputeController extends Controller
         return redirect()->back()->with('success', 'Dispute Case #' . $dispute->id . ' has been successfully resolved!');
     }
 
-    // Assign dispute task to a selected librarian staff member
     public function dashboardAssign(Request $request, $id)
     {
         $request->validate([
@@ -229,7 +217,6 @@ class DisputeController extends Controller
         return redirect()->back()->with('success', 'Task successfully assigned to ' . ($staff->name ?? 'Librarian'));
     }
 
-    // Process partial/full refunds or credit reconciliation for broken tools mid-use
     public function processRefund(Request $request)
     {
         $request->validate([
@@ -250,10 +237,9 @@ class DisputeController extends Controller
             $borrowId = $res->id;
         }
 
-        // Record the refund as a payment ledger line adhering strictly to database enum constraints
         \App\Models\Payment::create([
             'reservation_id' => $res->id,
-            'amount'         => -$request->amount, // negative amount indicates refund/credit
+            'amount'         => -$request->amount, 
             'payment_method' => 'wallet',
             'status'         => 'refunded',
         ]);

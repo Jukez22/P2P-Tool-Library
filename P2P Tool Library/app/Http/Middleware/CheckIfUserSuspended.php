@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckIfUserSuspended
 {
-    // Block suspended users
+
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check() && auth()->user()->isSuspended()) {

@@ -15,20 +15,17 @@ class InsuranceClaimNotification extends Notification implements ShouldQueue
     protected $claim;
     protected $event;
 
-    // constructor
     public function __construct(InsuranceClaim $claim, string $event)
     {
         $this->claim = $claim;
         $this->event = $event;
     }
 
-    // channels: mail and db
     public function via(object $notifiable): array
     {
         return ['mail', 'database'];
     }
 
-    // Email
     public function toMail(object $notifiable): MailMessage
     {
         $statusMessages = [
@@ -46,7 +43,6 @@ class InsuranceClaimNotification extends Notification implements ShouldQueue
             ->line('Thank you for using our P2P Tool Library service!');
     }
 
-    // DB array
     public function toArray(object $notifiable): array
     {
         return [

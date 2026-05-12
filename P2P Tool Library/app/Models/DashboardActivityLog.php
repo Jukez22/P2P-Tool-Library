@@ -22,19 +22,16 @@ class DashboardActivityLog extends Model
         'activity_time' => 'datetime',
     ];
 
-    // Associated borrow
     public function borrow()
     {
         return $this->belongsTo(Borrow::class, 'borrow_id');
     }
 
-    // User linked to activity
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Tool linked to activity
     public function tool()
     {
         return $this->belongsTo(Tool::class);

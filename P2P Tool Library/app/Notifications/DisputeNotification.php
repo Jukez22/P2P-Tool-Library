@@ -15,20 +15,17 @@ class DisputeNotification extends Notification implements ShouldQueue
     protected $dispute;
     protected $event;
 
-    // constructor
     public function __construct(Dispute $dispute, string $event)
     {
         $this->dispute = $dispute;
         $this->event = $event;
     }
 
-    // DB and Mail channels
     public function via(object $notifiable): array
     {
         return ['database', 'mail'];
     }
 
-    // Email content
     public function toMail(object $notifiable): MailMessage
     {
         $messages = [
@@ -46,7 +43,6 @@ class DisputeNotification extends Notification implements ShouldQueue
             ->line('Thank you for using our P2P library!');
     }
 
-    // DB data
     public function toArray(object $notifiable): array
     {
         return [

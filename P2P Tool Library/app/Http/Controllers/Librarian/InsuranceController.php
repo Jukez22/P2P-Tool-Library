@@ -6,6 +6,6 @@ use App\Http\Controllers\Controller;
 
 class InsuranceController extends Controller
 {
-    //
+
 }
 

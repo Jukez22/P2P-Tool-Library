@@ -33,25 +33,21 @@ class Dispute extends Model
         return $this->belongsTo(Reservation::class, 'borrow_id');
     }
 
-    // The borrower
     public function borrower()
     {
         return $this->belongsTo(User::class, 'borrower_id');
     }
 
-    // The lender
     public function lender()
     {
         return $this->belongsTo(User::class, 'lender_id');
     }
 
-    // Handling librarian
     public function librarian()
     {
         return $this->belongsTo(User::class, 'librarian_id');
     }
 
-    // Dispute evidence
     public function evidences()
     {
         return $this->hasMany(DisputeEvidence::class);

@@ -10,10 +10,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB; 
 use Illuminate\Database\Eloquent\Collection;
 
-
 class AuditGenerationService
 {
-    // Generate random audits for testing/priority
+
     public function generateRandomAudits(int $limit = 5): int
     {
         $priorityUserIds = $this->getPriorityUserIds($limit * 2);
@@ -32,17 +31,16 @@ class AuditGenerationService
         return $createdCount;
     }
 
-    // Logic to find high-priority users for audits
     protected function getPriorityUserIds(int $limit)
     {
         return User::query()
-            // Users with reported issues
+
             ->whereHas('reportedUser') 
-            // Users with failed previous audits
+
             ->orWhereHas('inventoryAudits', function ($query) {
                 $query->where('audit_status', 'rejected');
             })
-            // Users with high-value tools
+
             ->orWhereHas('inventoryAudits.items.tool', function ($query) {
                 $query->where('price', '>', 500);
             })
@@ -50,7 +48,6 @@ class AuditGenerationService
             ->unique();
     }
 
-    // Create a new audit for a user
     public function createAuditForUser(int $userId, array $toolIds): ?InventoryAudit
     {
         return DB::transaction(function () use ($userId, $toolIds) {

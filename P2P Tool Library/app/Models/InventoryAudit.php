@@ -27,19 +27,16 @@ class InventoryAudit extends Model
         'expires_at'   => 'datetime',
     ];
 
-    // The lender being audited
     public function lender()
     {
         return $this->belongsTo(User::class, 'lender_id');
     }
 
-    // Librarian who checked the audit
     public function reviewer()
     {
         return $this->belongsTo(User::class, 'reviewer_id');
     }
 
-    // Tools in this audit
     public function items()
     {
         return $this->hasMany(InventoryAuditItem::class);

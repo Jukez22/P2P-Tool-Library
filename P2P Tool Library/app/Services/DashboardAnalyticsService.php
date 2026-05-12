@@ -5,10 +5,9 @@ namespace App\Services;
 use App\Models\Reservation;
 use Illuminate\Support\Facades\DB;
 
-// Logic for dashboard charts and aggregates
 class DashboardAnalyticsService
 {
-    // Rental trends (last 30 days)
+
     public function calculateRentalTrends(): array
     {
         return Reservation::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
@@ -20,16 +19,14 @@ class DashboardAnalyticsService
             ->toArray();
     }
 
-    // Return rates (On-time vs Late)
     public function calculateReturnRates(): array
     {
         $totalCompleted = Reservation::where('status', 'completed')->count();
-        
+
         if ($totalCompleted === 0) {
             return ['on_time' => 0, 'late' => 0];
         }
 
-        // On-time = completed and not in late_return_logs
         $lateCount = DB::table('late_return_logs')->count();
         $onTimeCount = max(0, $totalCompleted - $lateCount);
 
@@ -39,7 +36,6 @@ class DashboardAnalyticsService
         ];
     }
 
-    // Overdue stats
     public function calculateOverdueStatistics(): array
     {
         $now = now();

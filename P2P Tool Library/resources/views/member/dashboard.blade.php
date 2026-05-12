@@ -211,7 +211,7 @@
                       @method('DELETE')
                       <button type="submit" class="btn btn-link btn-sm text-danger text-decoration-none p-0 ms-2">Cancel</button>
                     </form>
-                    <a href="{{ route('member.messages.show', $res->tool->owner_id) }}" class="btn btn-outline-secondary btn-sm ms-2" title="Message Lender">💬</a>
+                    <a href="{{ route('member.dashboard', ['panel' => 'messages', 'contact_id' => $res->tool->owner_id]) }}" class="btn btn-outline-secondary btn-sm ms-2" title="Message Lender">💬</a>
                     <button class="btn btn-outline-danger btn-sm ms-2" title="Report Issue" onclick="setReportModal({{ $res->id }}, {{ $res->tool_id }}, {{ $res->tool->owner_id }})">🚩</button>
                   </td>
                 </tr>
@@ -397,29 +397,14 @@
         <div class="card" style="max-width:460px;">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <button class="btn btn-outline-secondary btn-sm">← Prev</button>
-              <strong class="text-dark">May 2026</strong>
-              <button class="btn btn-outline-secondary btn-sm">Next →</button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="changeMonth(-1)">← Prev</button>
+              <strong class="text-dark" id="calMonthLabel"></strong>
+              <button class="btn btn-outline-secondary btn-sm" onclick="changeMonth(1)">Next →</button>
             </div>
             <div class="row row-cols-7 g-1 text-center mb-2">
               <div class="col"><small class="text-secondary fw-bold">Su</small></div><div class="col"><small class="text-secondary fw-bold">Mo</small></div><div class="col"><small class="text-secondary fw-bold">Tu</small></div><div class="col"><small class="text-secondary fw-bold">We</small></div><div class="col"><small class="text-secondary fw-bold">Th</small></div><div class="col"><small class="text-secondary fw-bold">Fr</small></div><div class="col"><small class="text-secondary fw-bold">Sa</small></div>
             </div>
-            <div class="row row-cols-7 g-1 text-center small">
-              <div class="col"></div><div class="col"></div><div class="col"></div>
-              <div class="col"><span class="badge bg-success w-100">1</span></div>
-              <div class="col"><span class="badge bg-success w-100">2</span></div>
-              <div class="col"><span class="badge bg-primary w-100 shadow">3</span></div>
-              <div class="col"><span class="badge bg-success w-100">4</span></div>
-              <div class="col"><span class="badge bg-warning text-dark w-100">5</span></div>
-              <div class="col"><span class="badge bg-warning text-dark w-100">6</span></div>
-              <div class="col"><span class="badge bg-warning text-dark w-100">7</span></div>
-              <div class="col"><span class="badge bg-success w-100">8</span></div>
-              <div class="col"><span class="badge bg-success w-100">9</span></div>
-              <div class="col"><span class="badge bg-light text-dark border w-100">10</span></div>
-              <div class="col"><span class="badge bg-light text-dark border w-100">11</span></div>
-              <div class="col"><span class="badge bg-success w-100">12</span></div>
-              <div class="col"><span class="badge bg-success w-100">13</span></div>
-              <div class="col"><span class="badge bg-light text-dark border w-100">14</span></div>
+            <div class="row row-cols-7 g-1 text-center small" id="calDaysGrid">
             </div>
             <div class="d-flex gap-3 mt-4 small text-secondary">
               <span><span class="badge bg-success">·</span> Available</span>
@@ -454,9 +439,13 @@
       <div class="panel" id="panel-deposit">
         <div class="fw-bold fs-5 mb-1">Deposit & Escrow</div>
         <div class="text-secondary small mb-3">Insurance deposits held securely</div>
+        @php
+          $heldDeposit = $user->reservations->whereIn('status', ['Confirmed', 'Active'])->sum(function($r){ return $r->tool->price * 2; });
+          $releasedDeposit = $user->reservations->where('status', 'Completed')->sum(function($r){ return $r->tool->price * 2; });
+        @endphp
         <div class="row g-3 mb-4 text-center">
-          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">0 EGP</div><small class="text-secondary">Held in Escrow</small></div></div>
-          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">0 EGP</div><small class="text-secondary">Total Released</small></div></div>
+          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">{{ $heldDeposit }} EGP</div><small class="text-secondary">Held in Escrow</small></div></div>
+          <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-primary">{{ $releasedDeposit }} EGP</div><small class="text-secondary">Total Released</small></div></div>
           <div class="col-md-4"><div class="card p-3 shadow-sm"><div class="fs-5 fw-bold text-danger">0 EGP</div><small class="text-secondary">Forfeited</small></div></div>
         </div>
         <div class="card">
@@ -465,7 +454,22 @@
             <table class="table table-hover mb-0 small text-center align-middle">
               <thead class="table-light"><tr><th>Tool</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
               <tbody>
+                @forelse($user->reservations as $res)
+                <tr>
+                  <td>🔩 {{ $res->tool->title }}</td>
+                  <td>{{ $res->created_at->format('Y-m-d') }}</td>
+                  <td class="fw-bold">{{ $res->tool->price * 2 }} EGP</td>
+                  <td>
+                    @if(in_array($res->status, ['Confirmed', 'Active']))
+                      <span class="badge bg-warning text-dark">Held in Escrow</span>
+                    @else
+                      <span class="badge bg-success">Released</span>
+                    @endif
+                  </td>
+                </tr>
+                @empty
                 <tr><td colspan="4" class="text-center text-muted p-4">No recent transactions.</td></tr>
+                @endforelse
               </tbody>
             </table>
           </div>
@@ -483,7 +487,8 @@
                 <input type="text" class="form-control form-control-sm bg-light" value="toolshare.eg/ref/{{ strtoupper(explode(' ', $user->name)[0]) }}{{ $user->id }}" readonly/>
                 <button class="btn btn-primary btn-sm" onclick="alert('Copied!')">Copy</button>
               </div>
-              <div class="bg-primary bg-opacity-10 p-3 rounded text-center border border-primary"><div class="fs-4 fw-bold text-primary">0 EGP</div><small class="text-secondary">Available Credits</small></div>
+              @php $totalRewards = $user->referrals->sum('reward'); @endphp
+              <div class="bg-primary bg-opacity-10 p-3 rounded text-center border border-primary"><div class="fs-4 fw-bold text-primary">{{ $totalRewards }} EGP</div><small class="text-secondary">Available Credits</small></div>
             </div>
           </div>
           <div class="col-md-6">
@@ -658,6 +663,62 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+  let currentDate = new Date();
+  const bookedRanges = [
+    @foreach(\App\Models\Reservation::whereHas('tool', function($q) use ($user) { $q->where('owner_id', $user->id); })->whereIn('status', ['Confirmed', 'Active'])->get() as $res)
+      @if($res->start_datetime && $res->end_datetime)
+        { start: "{{ $res->start_datetime->format('Y-m-d') }}", end: "{{ $res->end_datetime->format('Y-m-d') }}" },
+      @endif
+    @endforeach
+  ];
+
+  function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const labelEl = document.getElementById('calMonthLabel');
+    if(labelEl) labelEl.innerText = monthNames[month] + " " + year;
+    
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    
+    let html = '';
+    for (let i = 0; i < firstDayIndex; i++) {
+      html += '<div class="col"></div>';
+    }
+    
+    const today = new Date();
+    const isCurrentMonth = (today.getFullYear() === year && today.getMonth() === month);
+    
+    for (let d = 1; d <= totalDays; d++) {
+      const mStr = String(month + 1).padStart(2, '0');
+      const dStr = String(d).padStart(2, '0');
+      const dateStr = `${year}-${mStr}-${dStr}`;
+      
+      let isBooked = false;
+      for (const b of bookedRanges) {
+        if (dateStr >= b.start && dateStr <= b.end) {
+          isBooked = true;
+          break;
+        }
+      }
+      
+      const isToday = (isCurrentMonth && d === today.getDate());
+      const badgeClass = isToday ? 'bg-primary shadow' : (isBooked ? 'bg-warning text-dark' : 'bg-success');
+      
+      html += `<div class="col"><span class="badge ${badgeClass} w-100 py-1" style="cursor:pointer;" onclick="alert('Date: ${dateStr}\\nStatus: ${isBooked ? 'Booked' : 'Available'}')">${d}</span></div>`;
+    }
+    
+    const gridEl = document.getElementById('calDaysGrid');
+    if(gridEl) gridEl.innerHTML = html;
+  }
+
+  function changeMonth(dir) {
+    currentDate.setMonth(currentDate.getMonth() + dir);
+    renderCalendar();
+  }
+
   function show(id, el) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     const target = document.getElementById('panel-' + id);
@@ -669,16 +730,19 @@
     if (el) {
       el.classList.add('active-link');
     }
+    if (id === 'calendar') {
+      renderCalendar();
+    }
   }
 
-  // Initialize from URL parameters
   window.addEventListener('load', () => {
     const params = new URLSearchParams(window.location.search);
     const panel = params.get('panel') || 'dashboard';
     const btn = document.querySelector(`button[onclick*="'${panel}'"]`);
     show(panel, btn);
     
-    // Auto-scroll chat to bottom
+    renderCalendar();
+
     const chat = document.getElementById('chatWindow');
     if(chat) chat.scrollTop = chat.scrollHeight;
   });

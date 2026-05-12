@@ -19,13 +19,11 @@ class DisputeEvidence extends Model
         'message',
     ];
 
-    // Parent dispute
     public function dispute()
     {
         return $this->belongsTo(Dispute::class);
     }
 
-    // User who uploaded this
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');

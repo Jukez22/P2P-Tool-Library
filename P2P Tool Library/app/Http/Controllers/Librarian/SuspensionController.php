@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Date;
 
 class SuspensionController extends Controller
 {
-    // Permanently ban user
+
     public function banUser(Request $request, $id)
     {
         $request->validate([
@@ -38,7 +38,6 @@ class SuspensionController extends Controller
         ], 201);
     }
 
-    // Temporary suspension (X days)
     public function suspendUser(Request $request, $id)
     {
         $request->validate([
@@ -67,7 +66,6 @@ class SuspensionController extends Controller
         ], 201);
     }
 
-    // Unified action for dashboard restriction form submission
     public function applyRestriction(Request $request)
     {
         $request->validate([
@@ -76,7 +74,6 @@ class SuspensionController extends Controller
             'reason'      => 'required|string|max:255',
         ]);
 
-        // Find user by ID or Email or Name
         $user = User::where('id', $request->member_id)
                     ->orWhere('email', $request->member_id)
                     ->orWhere('name', 'like', '%' . $request->member_id . '%')
@@ -108,7 +105,6 @@ class SuspensionController extends Controller
         return redirect()->back()->with('success', 'Restriction successfully applied to ' . $user->name);
     }
 
-    // Lift ban / restriction
     public function liftBan($id)
     {
         $suspension = UserSuspension::find($id);

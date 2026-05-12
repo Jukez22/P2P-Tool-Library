@@ -18,13 +18,11 @@ class InventoryAuditItem extends Model
         'rejection_reason',
     ];
 
-    // Parent audit
     public function audit()
     {
         return $this->belongsTo(InventoryAudit::class, 'inventory_audit_id');
     }
 
-    // The tool
     public function tool()
     {
         return $this->belongsTo(Tool::class);

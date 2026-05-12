@@ -10,7 +10,7 @@ use Exception;
 
 class DepositForfeitureService
 {
-    // Handle deposit forfeiture when dispute is resolved
+
     public function processForfeiture(Dispute $dispute): bool
     {
         if (!$dispute->deposit_forfeited || $dispute->forfeited_amount <= 0) {
@@ -18,7 +18,7 @@ class DepositForfeitureService
         }
 
         return DB::transaction(function () use ($dispute) {
-            // Find the deposit associated with the borrow
+
             $deposit = Deposit::where('reservation_id', $dispute->borrow_id)
                 ->where('status', 'held')
                 ->first();
@@ -31,15 +31,13 @@ class DepositForfeitureService
                 throw new Exception("Forfeited amount exceeds available deposit.");
             }
 
-            // Deduct from borrower deposit and update status
             $remainingAmount = $deposit->amount - $dispute->forfeited_amount;
-            
+
             $deposit->update([
                 'status' => $remainingAmount > 0 ? 'held' : 'forfeited',
                 'amount' => $remainingAmount
             ]);
 
-            // Transfer to lender "wallet"
             Payment::create([
                 'reservation_id' => $dispute->borrow_id,
                 'amount'         => $dispute->forfeited_amount,

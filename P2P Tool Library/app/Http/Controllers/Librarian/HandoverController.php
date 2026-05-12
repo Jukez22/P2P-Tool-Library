@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 
 class HandoverController extends Controller
 {
-    // Verify tool handover via QR
+
     public function verifyHandover(Request $request)
     {
         $request->validate([
@@ -35,7 +35,6 @@ class HandoverController extends Controller
         return redirect()->back()->with('success', 'Tool handover verified successfully!');
     }
 
-    // Generate QR Code for handover verification
     public function generateQR(Request $request)
     {
         $request->validate([
@@ -43,9 +42,8 @@ class HandoverController extends Controller
             'transfer_type'  => 'nullable|string',
         ]);
 
-        // Clean any non-numeric chars if entered like RES-123
         $borrowId = preg_replace('/[^0-9]/', '', $request->reservation_id);
-        
+
         $qrCode = 'QR-' . strtoupper(substr(md5(uniqid()), 0, 8));
 
         $verification = HandoverVerification::updateOrCreate(

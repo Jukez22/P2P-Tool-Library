@@ -20,7 +20,6 @@ class LateReturnLog extends Model
         'sent_at' => 'datetime',
     ];
 
-    // Associated escalation
     public function escalation()
     {
         return $this->belongsTo(LateReturnEscalation::class, 'late_return_escalation_id');

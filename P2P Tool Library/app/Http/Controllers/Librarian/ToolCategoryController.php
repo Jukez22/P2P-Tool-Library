@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class ToolCategoryController extends Controller
 {
-    // Create tool category
+
     public function createCategory(Request $request)
     {
         $request->validate([
@@ -43,7 +43,6 @@ class ToolCategoryController extends Controller
         return redirect()->back()->with('success', 'Category "' . $category->name . '" created successfully!');
     }
 
-    // Update existing category
     public function updateCategory(UpdateToolCategoryRequest $request, $categoryId)
     {
         $category = ToolCategory::find($categoryId);
@@ -60,7 +59,6 @@ class ToolCategoryController extends Controller
         ]);
     }
 
-    // Link tool to a category
     public function assignToolToCategory(Request $request)
     {
         $request->validate([
@@ -69,7 +67,7 @@ class ToolCategoryController extends Controller
         ]);
 
         $category = ToolCategory::find($request->category_id);
-        
+
         $category->tools()->syncWithoutDetaching([$request->tool_id]);
 
         return response()->json([
@@ -77,11 +75,10 @@ class ToolCategoryController extends Controller
         ]);
     }
 
-    // Get hierarchical categories
     public function getCategoryTree()
     {
         $categories = ToolCategory::whereNull('parent_id')
-            ->with('children') // Recursive loading
+            ->with('children') 
             ->where('is_active', true)
             ->get();
 
@@ -90,7 +87,6 @@ class ToolCategoryController extends Controller
         ]);
     }
 
-    // Get tools by category ID
     public function getToolsByCategory($categoryId)
     {
         $category = ToolCategory::find($categoryId);
@@ -106,7 +102,6 @@ class ToolCategoryController extends Controller
         ]);
     }
 
-    // Search tools by keyword/category
     public function searchTools(Request $request)
     {
         $request->validate([
@@ -124,7 +119,7 @@ class ToolCategoryController extends Controller
         }
 
         if ($request->category_id) {
-            // Include children in search
+
             $categoryIds = $this->getDescendantIds($request->category_id);
             $categoryIds[] = (int) $request->category_id;
 
@@ -140,7 +135,6 @@ class ToolCategoryController extends Controller
         ]);
     }
 
-    // Get all children IDs recursively
     protected function getDescendantIds($parentId)
     {
         $childIds = ToolCategory::where('parent_id', $parentId)->pluck('id')->toArray();

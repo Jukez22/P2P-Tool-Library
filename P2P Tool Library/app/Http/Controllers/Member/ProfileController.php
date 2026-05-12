@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    // View profile
+
     public function show()
     {
         $user = Auth::user();
@@ -17,7 +17,6 @@ class ProfileController extends Controller
         return response()->json($user);
     }
 
-    // Update profile
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -47,7 +46,6 @@ class ProfileController extends Controller
         return back()->with('success', 'Profile and Verification updated successfully');
     }
 
-    // Change password
     public function changePassword(Request $request)
     {
         $request->validate([
@@ -57,7 +55,6 @@ class ProfileController extends Controller
 
         $user = Auth::user();
 
-        // Check current password
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'message' => 'Current password is incorrect'

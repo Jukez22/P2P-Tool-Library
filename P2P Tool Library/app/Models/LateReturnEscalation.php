@@ -31,7 +31,6 @@ class LateReturnEscalation extends Model
         return $this->belongsTo(Reservation::class, 'borrow_id');
     }
 
-    // Escalation history logs
     public function logs()
     {
         return $this->hasMany(LateReturnLog::class);

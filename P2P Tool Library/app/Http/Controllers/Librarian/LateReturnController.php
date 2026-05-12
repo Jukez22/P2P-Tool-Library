@@ -25,7 +25,6 @@ class LateReturnController extends Controller
         $this->penaltyService = $penaltyService;
     }
 
-    // Check for late returns and create escalations
     public function checkLateReturns()
     {
         $now = Carbon::now();
@@ -55,7 +54,7 @@ class LateReturnController extends Controller
                         'penalty_amount'   => $penaltyAmount,
                         'escalated_at'     => $now,
                     ]);
-                    
+
                     $this->sendLateReturnNotification($escalation);
 
                     if ($penaltyAmount > 0) {
@@ -73,7 +72,6 @@ class LateReturnController extends Controller
         ]);
     }
 
-    // Apply penalty from deposit
     public function applyPenalty(LateReturnEscalation $escalation)
     {
         try {
@@ -84,15 +82,13 @@ class LateReturnController extends Controller
 
                 if ($deposit) {
                     $amountToDeduct = min($deposit->amount, $escalation->penalty_amount);
-                    
-                    // Deduct from deposit
+
                     $deposit->decrement('amount', $amountToDeduct);
-                    
+
                     if ($deposit->amount <= 0) {
                         $deposit->update(['status' => 'forfeited']);
                     }
 
-                    // Log transaction
                     Payment::create([
                         'reservation_id' => $escalation->borrow_id,
                         'amount'         => $amountToDeduct,
@@ -113,15 +109,12 @@ class LateReturnController extends Controller
         }
     }
 
-    // Notify user and log it
     public function sendLateReturnNotification(LateReturnEscalation $escalation)
     {
         $borrower = $escalation->borrow->borrower;
 
-        // Trigger Laravel Notification
         $borrower->notify(new LateReturnNotification($escalation));
 
-        // Create log record
         LateReturnLog::create([
             'late_return_escalation_id' => $escalation->id,
             'notification_type'         => 'system',
@@ -132,18 +125,16 @@ class LateReturnController extends Controller
         $escalation->update(['notification_sent' => true]);
     }
 
-    // Map days to escalation level
     protected function getEscalationLevel($days)
     {
         if ($days >= 14) return 'final_notice';
         if ($days >= 7)  return 'penalty_level_2';
         if ($days >= 3)  return 'penalty_level_1';
         if ($days >= 1)  return 'warning';
-        
+
         return null;
     }
 
-    // Mark escalation as resolved
     public function resolveEscalation($escalationId)
     {
         $escalation = LateReturnEscalation::find($escalationId);
@@ -162,7 +153,6 @@ class LateReturnController extends Controller
         ]);
     }
 
-    // Direct web dashboard escalate action
     public function dashboardEscalate($id)
     {
         $escalation = LateReturnEscalation::find($id);
@@ -177,7 +167,7 @@ class LateReturnController extends Controller
 
         $escalation->update([
             'escalation_level' => $nextLevel,
-            'penalty_amount'   => $escalation->penalty_amount + 50, // increase penalty
+            'penalty_amount'   => $escalation->penalty_amount + 50, 
             'escalated_at'     => Carbon::now(),
         ]);
 

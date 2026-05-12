@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class MarketingController extends Controller
 {
-    // Launch a new promotional campaign or discount code
+
     public function storeCampaign(Request $request)
     {
         $request->validate([
@@ -31,10 +31,9 @@ class MarketingController extends Controller
                 'is_active'  => true,
             ]);
         } catch (\Exception $e) {
-            // Silently fall back to session flash if the user hasn't run php artisan migrate yet
+
         }
 
-        // Flash campaign details to session to render dynamically in active campaigns list
         $campaign = [
             'name'     => $request->name,
             'code'     => strtoupper($request->code),

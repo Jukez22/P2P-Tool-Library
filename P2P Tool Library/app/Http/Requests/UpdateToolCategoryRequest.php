@@ -7,13 +7,12 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateToolCategoryRequest extends FormRequest
 {
-    // Authorization
+
     public function authorize(): bool
     {
         return true;
     }
 
-    // Validation rules
     public function rules(): array
     {
         $categoryId = $this->route('categoryId');
@@ -24,7 +23,7 @@ class UpdateToolCategoryRequest extends FormRequest
             'parent_id'   => [
                 'nullable',
                 'exists:tool_categories,id',
-                new NoCircularCategoryHierarchy($categoryId) // Custom loop check
+                new NoCircularCategoryHierarchy($categoryId) 
             ],
             'description' => 'nullable|string',
             'icon'        => 'nullable|string',

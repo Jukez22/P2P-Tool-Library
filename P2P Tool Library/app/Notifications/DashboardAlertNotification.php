@@ -14,20 +14,17 @@ class DashboardAlertNotification extends Notification implements ShouldQueue
     protected $type;
     protected $data;
 
-    // Constructor
     public function __construct(string $type, array $data)
     {
         $this->type = $type;
         $this->data = $data;
     }
 
-    // Deliver via DB and Broadcast
     public function via(object $notifiable): array
     {
         return ['database', 'broadcast'];
     }
 
-    // DB representation
     public function toArray(object $notifiable): array
     {
         return [
@@ -37,7 +34,6 @@ class DashboardAlertNotification extends Notification implements ShouldQueue
         ];
     }
 
-    // Broadcast representation
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage([
@@ -47,7 +43,6 @@ class DashboardAlertNotification extends Notification implements ShouldQueue
         ]);
     }
 
-    // Get message string
     protected function getAlertMessage(): string
     {
         return match ($this->type) {

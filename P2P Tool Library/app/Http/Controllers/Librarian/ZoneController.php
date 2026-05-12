@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class ZoneController extends Controller
 {
-    // Create new Zone from dashboard
+
     public function store(Request $request)
     {
         $request->validate([

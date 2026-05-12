@@ -8,10 +8,9 @@ use App\Models\User;
 use App\Events\DashboardActivityUpdated;
 use App\Notifications\DashboardAlertNotification;
 
-// Handle logging for system-wide activities for the dashboard
 class DashboardActivityService
 {
-    // Log when a rental starts
+
     public function logRentalStarted(Reservation $reservation)
     {
         $log = DashboardActivityLog::create([
@@ -28,7 +27,6 @@ class DashboardActivityService
         return $log;
     }
 
-    // Log when a rental is returned
     public function logRentalCompleted(Reservation $reservation)
     {
         $log = DashboardActivityLog::create([
@@ -41,7 +39,7 @@ class DashboardActivityService
         ]);
 
         broadcast(new DashboardActivityUpdated($log));
-        
+
         $this->notifyLibrarians('completed', [
             'reservation_id' => $reservation->id,
             'tool_id'        => $reservation->tool_id
@@ -50,7 +48,6 @@ class DashboardActivityService
         return $log;
     }
 
-    // Log pending returns (reminders)
     public function logPendingReturn(Reservation $reservation)
     {
         $log = DashboardActivityLog::create([
@@ -72,7 +69,6 @@ class DashboardActivityService
         return $log;
     }
 
-    // Log overdue rentals
     public function logOverdueReturn(Reservation $reservation)
     {
         $log = DashboardActivityLog::create([
@@ -94,7 +90,6 @@ class DashboardActivityService
         return $log;
     }
 
-    // Log rental payments
     public function logPaymentReceived(Reservation $reservation, float $amount)
     {
         $log = DashboardActivityLog::create([
@@ -111,7 +106,6 @@ class DashboardActivityService
         return $log;
     }
 
-    // Alert all librarians
     protected function notifyLibrarians(string $type, array $data)
     {
         User::where('role', 'libraian')->get()->each(function ($librarian) use ($type, $data) {

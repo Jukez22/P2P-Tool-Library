@@ -8,13 +8,11 @@ use Illuminate\Support\Carbon;
 
 class ExpireInventoryAudits extends Command
 {
-    // command signature
+
     protected $signature = 'app:expire-inventory-audits';
 
-    // command description
     protected $description = 'Expire audits that are past due';
 
-    // execute command
     public function handle()
     {
         $expiredCount = InventoryAudit::where('audit_status', 'pending')

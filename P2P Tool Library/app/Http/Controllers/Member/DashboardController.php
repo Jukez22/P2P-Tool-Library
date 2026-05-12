@@ -10,8 +10,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
-        // Load relationships to avoid N+1 issues in the view
+
         $user->load([
             'tools.category', 
             'tools.reservations',
@@ -25,7 +24,6 @@ class DashboardController extends Controller
 
         $reports = \App\Models\Report::where('reporter_id', $user->id)->latest()->get();
 
-        // Calculate earnings this month (based on reservations for their tools)
         $earningsThisMonth = \App\Models\Reservation::whereHas('tool', function($q) use ($user) {
                 $q->where('owner_id', $user->id);
             })
@@ -42,12 +40,11 @@ class DashboardController extends Controller
 
         $categories = \App\Models\Category::all();
 
-        // Fetch message contacts with their latest message
         $userId = Auth::id();
         $senderIds = \App\Models\Message::where('receiver_id', $userId)->pluck('sender_id');
         $receiverIds = \App\Models\Message::where('sender_id', $userId)->pluck('receiver_id');
         $contactIds = $senderIds->merge($receiverIds)->unique();
-        
+
         $contacts = \App\Models\User::whereIn('id', $contactIds)
             ->get()
             ->map(function ($contact) use ($userId) {
@@ -66,7 +63,6 @@ class DashboardController extends Controller
                 return $contact->last_message->created_at ?? 0;
             });
 
-        // Fetch messages for selected contact
         $selectedContactId = request('contact_id', $contacts->first()->id ?? null);
         $activeMessages = collect();
         $selectedContact = null;
@@ -83,7 +79,6 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        // Fetch recent messages for the widget
         $recentMessages = \App\Models\Message::where('receiver_id', $userId)
             ->with('sender')
             ->latest()

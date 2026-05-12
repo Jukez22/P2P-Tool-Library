@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    // Handle role-based authorization
+
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (!auth()->check()) {
@@ -17,7 +17,6 @@ class RoleMiddleware
 
         $userRole = auth()->user()->role;
 
-        // Basic authorization check
         if ($userRole !== $role) {
             abort(403, 'Unauthorized Access.');
         }

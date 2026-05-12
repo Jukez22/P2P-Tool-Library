@@ -17,11 +17,11 @@ class InventoryController extends Controller
 
         $consumable = Consumable::findOrFail($request->consumable_id);
         $consumable->stock_level -= $request->quantity_used;
-        
+
         if ($consumable->stock_level < 0) {
             $consumable->stock_level = 0;
         }
-        
+
         $consumable->save();
 
         $needsReorder = $consumable->stock_level <= $consumable->reorder_threshold;

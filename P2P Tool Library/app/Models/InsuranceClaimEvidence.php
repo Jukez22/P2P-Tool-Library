@@ -18,13 +18,11 @@ class InsuranceClaimEvidence extends Model
         'uploaded_by',
     ];
 
-    // The insurance claim
     public function claim()
     {
         return $this->belongsTo(InsuranceClaim::class, 'insurance_claim_id');
     }
 
-    // User who uploaded this
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');

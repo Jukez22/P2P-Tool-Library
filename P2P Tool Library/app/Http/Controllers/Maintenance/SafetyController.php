@@ -30,7 +30,6 @@ class SafetyController extends Controller
         return redirect()->route('maintenance.dashboard')->with('success', 'Safety certification updated successfully');
     }
 
-
     public function markUnfit(Request $request)
     {
         $request->validate([

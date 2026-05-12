@@ -145,13 +145,18 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   let currentTool = {};
-  let trustFilter = 0; // Default to 0 so all show initially
+  let trustFilter = 0;
+  const authUserId = {{ auth()->id() ?? 0 }};
 
   function openBook(n, r, d, id, ownerId) {
+    if (ownerId === authUserId) {
+      alert("You own this tool! You cannot borrow or book your own listed inventory.");
+      return;
+    }
     currentTool = {r, d};
     document.getElementById('mTitle').innerText = 'Book ' + n;
     document.getElementById('modal_tool_id').value = id;
-    document.getElementById('msgBtn').href = "{{ url('member/messages') }}/" + ownerId;
+    document.getElementById('msgBtn').href = "{{ route('member.dashboard') }}?panel=messages&contact_id=" + ownerId;
     document.getElementById('sd').value = new Date().toISOString().split('T')[0];
     document.getElementById('pbox').style.display = 'none';
     new bootstrap.Modal(document.getElementById('bookModal')).show();

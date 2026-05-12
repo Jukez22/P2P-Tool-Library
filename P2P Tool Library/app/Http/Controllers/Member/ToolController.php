@@ -55,7 +55,7 @@ class ToolController extends Controller
     public function edit($id)
     {
         $tool = Tool::findOrFail($id);
-        
+
         if ($tool->owner_id !== auth()->id()) {
             abort(403);
         }
